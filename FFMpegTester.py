@@ -11,17 +11,17 @@ This test is strictly single threaded, as some of the codecs will utilize multip
 # - Load inputs as JSON
 # - Command line arguments
 # - CPU time
-# - Create page for images from each selection 
 # - Allow for cropping of images
-# - More advanced pagnation of outputs....one HTML per input...each one has one HTML per time grab, other info
+# - Put images together into a video (write the name of the file on each image)
 # - Concatenate all the videos for each test into one with text between clips (reach goal)
 # - Option to skip conversion (output file must already be in place)
+# - Write pretty sizes of files
 
 # Here you can enter files that you want to test out
 # For some you may want to specify a seperate video and audio file to both be processed.  Follow the sintel example for that.
 # You can also specify points in the output file (in seconds) to record a png image, so quality can be looked at without running each video.
 test_input_files=[
-{"name":"PieTest","files":["PieTest.mkv"],"image_points":[{'sec':"3"},{'sec':"12"}]}
+{"name":"PieTest","files":["PieTest.mkv"],"image_points":[{'sec':"3",'w':'640','h':'480','x':'0','y':'0'},{'sec':"12",'w':'640','h':'480','x':'0','y':'0'}]}
 #, {"name":"sintel_clip","files":["sintel_clip.y4m","sintel_clip.flac"],"image_points":["2","5","7","9.560"]}
 #, {"name":"sintel_trailer","files":["sintel_trailer-video.y4m", "sintel_trailer-audio.flac"], "image_points":["3","15"]}
 ]
@@ -208,51 +208,87 @@ class TestPoints():
 
         self.tp = {}
         self.test_name = test_name
+        
         for point in points:
-            p = {"sec":point}
-            self.tp[point] = p
-            p[title] = test_name + "_" + point +  "s"
-            p[point][file_name] = self.tp[point][title] + ".html"
-            
-            f = open(self.tp[point][file_name], "w")
-            p[point][file] = f
+            if point.__class__ == "".__class__: # If points is just a list of strings for times
+                self.tp[point] = {'sec':point}
+                crop = {'w':'0','h':'0'}
+                self.setup(self.tp[point], point, crop, test_name)
+            elif point.__class__ == {}.__class__:
+                pt = point['sec'] 
+                self.tp[pt] = {"sec":pt}
+                crop = {'w':point['w'],'h':point['h'],'x':point['x'],'y':point['y']}
+                self.setup(self.tp[pt], pt, crop, test_name)
 
-            f.write("<html>\n<head><title>" +self.tp[point][title] + "</title></head>\n")
-            f.write("<body>\n")
+    def setup(self, p, point, crop, test_name):
+        p['crop'] = crop
+        p['title'] = test_name + "_" + point +  "s"
+        p['file_name'] = p['title'] + ".html"
 
+        p['file'] = open(p['file_name'], "w")
+
+        p['file'].write("<html>\n<head><title>" + p['title'] + "</title></head>\n")
+        p['file'].write("<body>\n")
+        
     def html_segment(self):
         snip = ""
-        for point,info in self.tp:
-            snip += '<a href="' + name + "_" + point + 's.html">' + name + "_" + point + 's</a><br />\n'
-        return snip        
+        for point,info in self.tp.items():
+            snip += '<a href="' + self.test_name + "_" + point + 's.html">' + self.test_name + "_" + point + 's</a><br />\n'
+        return snip
 
     def grab_points(self, video_file):
         thumbs = []
-        for point,info in self.tp:
+        for point in self.tp.values():
             # Use ffmpeg to make a single frame png
-            cmd = 'ffmpeg -i ' + video_file + ' -an -ss ' + sec + ' -an -r 1 -vframes 1 -y %d.png' 
+            cmd = 'ffmpeg -i ' + video_file + ' -an -ss ' + point['sec'] + ' -an -r 1 -vframes 1 -y %d.png' 
             call(shlex.split(cmd))
-            # TODO: crop the image down, put the cropped version in img/ put the full version in frames/
-            img = 'img/' + video_file + "-" + info['sec'] + 's.png'
+
+            img = 'img/' + video_file + "-" + point['sec'] + 's.png'
             # Move the output file to an appropriately named file in the img/ directory
-            cmd = 'mv 1.png img'
+            cmd = 'mv 1.png ' + img
             call(shlex.split(cmd))
-            thumb = 'thumb/' + video_file + "-" + sec + 's.png'
+            # Keep the full frame in the frames dir
+            frm = 'frames/'  + video_file + "-" + point['sec'] + 's.png'
+            cmd = 'cp ' + img + ' ' + frm
+            call(shlex.split(cmd))
+
+            # Make the img actually the cropped version
+            try:
+                w = point['crop']['w']
+                h = point['crop']['h']
+                if w!='0' and h!='0':
+                    x = 0
+                    y = 0
+                    try:
+                        x = point['crop']['x']
+                    except KeyError:
+                        pass
+                    try:
+                        y = point['crop']['y']
+                    except KeyError:
+                        pass
+                cmd = 'mogrify -resize ' + w+'x'+h+'+'+x+'+'+y + img 
+                call(shlex.split(cmd))
+            except KeyError:
+                pass
+
+            thumb = 'thumb/' + video_file + "-" + point['sec'] + 's.png'
             # Create a thumbnail image in the thumb/ directory
             cmd = 'convert ' + img + ' -resize 100x100 ' + thumb
             call(shlex.split(cmd))
 
             thumbs.append({'img':img,'thumb':thumb})
-            
-            info['file'].write("<p>" + video_file + "<br />\n")
-            info['file'].write('<img src="' + img + '">\n</p>')  
+
+            point['file'].write("<p>" + video_file + "<br />\n")
+            point['file'].write('<img src="' + img + '">\n</p>')
+            point['file'].flush()
         return thumbs
 
-    def close(self)
-        for point,info in self.tp:
-            info['file'].write("</body>\n")
-            info['file'].write("</html>\n")
-            info['file'].close()
+    def close(self):
+        for point in self.tp.values():
+            point['file'].write("</body>\n")
+            point['file'].write("</html>\n")
+            point['file'].close()
 
 class FFMpegTester():
     def __init__(self):
@@ -266,13 +302,13 @@ class FFMpegTester():
 
         self.results.write("<html>\n<head><title>FFMpegTester Results</title></head>\n")
         self.results.write("<body>\n") 
-        self.results.write("<p>\n"
+        self.results.write("<p>\n")
 
         self.results.write(self.tps.html_segment())
 
         self.results.write("</p>\n")
         self.results.write('<table style="text-align: left; width: 100%;" border="1" ')
-        self.results.write('cellpadding="2" cellspacing="2"><tbody>\n
+        self.results.write('cellpadding="2" cellspacing="2"><tbody>\n')
         self.results.write('  <tr>\n')
         self.results.write("   <td><b>No.</b></td>\n")
         self.results.write("   <td><b>Test Title</b></td>\n")
@@ -311,13 +347,13 @@ class FFMpegTester():
                     cmds = test['commands'][:]
                     output = test['output']
                     for name, value in combo.items():
-                        output = output.replace(name, value)                
+                        output = output.replace(name, value)
                         for val in range(len(cmds)):
-                            cmds[val] = cmds[val].replace(name, value)          
-                    self.run_test_version(cmds, output)          
+                            cmds[val] = cmds[val].replace(name, value)
+                    self.run_test_version(cmds, output)
             self.tps.close()
             self.finish_html()
-    
+
     def run_test_version(self, cmds, output):
         print "Starting: " + output
         self.results.write("  <tr>\n")
@@ -327,31 +363,30 @@ class FFMpegTester():
         self.results.write("   <td>\n")
         self.results.write("    <a href=\"" + output + "\">" + output + "</a><br>\n") #Jumping the gun a bit
         # TODO start CPU timer...is it possible?
-    	start = time.time()
+        start = time.time()
         for cmd in cmds:
             c = shlex.split(cmd)
             print cmd
             self.results.write("    " + cmd + "<br>\n") 
             call(c)
-	    stop = time.time()
-	    elapsed = stop - start
-        self.results.write("   </td>\n")   
-        self.results.write("   <td>" + str(elapsed) + "s</td>\n")        
-        self.results.write("   <td></td>\n")           
+        stop = time.time()
+        elapsed = stop - start
+        self.results.write("   </td>\n")
+        self.results.write("   <td>" + str(elapsed) + "s</td>\n")
+        self.results.write("   <td></td>\n")
 
         # Get size of output file
         size = os.path.getsize(output)
-        self.results.write("   <td>" + str(size) + "B</td>\n")        
-        
+        self.results.write("   <td>" + str(size) + "B</td>\n")
+
         # Create Image for each image point
         self.results.write("   <td>")
-        thumbs = self.tps.grap_points(output)
+        thumbs = self.tps.grab_points(output)
         for thumb in thumbs:
-            self.results.write('    <a href=\"' + thumb['img'] '><img src=\"' + thumb['thumb'] "></a>\n")
+            self.results.write('    <a href="' + thumb['img'] + '"><img src="' + thumb['thumb'] + '"></a>\n')
         self.results.write("   </td>\n")
-        self.results.write("  </tr>\n")       
-        self.results.flush()         
-        
+        self.results.write("  </tr>\n")
+        self.results.flush()
 
 if __name__ == '__main__':
     t = FFMpegTester()
