@@ -11,16 +11,19 @@ This test is strictly single threaded, as some of the codecs will utilize multip
 # - Load inputs as JSON
 # - Command line arguments
 # - CPU time
-# - More advanced picture making, crop section, create image page
+# - Create page for images from each selection 
+# - Allow for cropping of images
 # - More advanced pagnation of outputs....one HTML per input...each one has one HTML per time grab, other info
+# - Concatenate all the videos for each test into one with text between clips (reach goal)
+# - Option to skip conversion (output file must already be in place)
 
 # Here you can enter files that you want to test out
 # For some you may want to specify a seperate video and audio file to both be processed.  Follow the sintel example for that.
 # You can also specify points in the output file (in seconds) to record a png image, so quality can be looked at without running each video.
 test_input_files=[
-{"name":"PieTest","files":["PieTest.mkv"],"image_points":["3","12"]}
-#, {"name":"sintel_clip","files":["sintel_clip.y4m","sintel_clip.flac"],"image_points":["2","5","8"]}
-#, {"name":"sintel_trailer","files":["sintel_trailer.y4m", "sintel_trailer-audio.flac"], "image_points":["3","15"]}
+{"name":"PieTest","files":["PieTest.mkv"],"image_points":[{'sec':"3"},{'sec':"12"}]}
+#, {"name":"sintel_clip","files":["sintel_clip.y4m","sintel_clip.flac"],"image_points":["2","5","7","9.560"]}
+#, {"name":"sintel_trailer","files":["sintel_trailer-video.y4m", "sintel_trailer-audio.flac"], "image_points":["3","15"]}
 ]
 
 # Here's some variables that can be used in the tests section
