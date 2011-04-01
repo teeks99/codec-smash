@@ -1,4 +1,5 @@
-# Sintel Trailer and mini-clip
+##### Sintel #####
+# Sintel Trailer and mini-clip - animated 1080p lossless
 
 ##### Download pre-requisites (the raw files)
 # Get Video
@@ -20,3 +21,8 @@ ffmpeg -i sintel_trailer-audio.flac -ss 7.0 -t 10.0 -acodec flac sintel_clip.fla
 # Cropping off black space at top and bottom
 ffmpeg -i 1080/sintel_trailer_2k_%04d.png -ss 7.0 -t 10.0 -vf crop=1920:816:0:132 -vcodec rawvideo -pix_fmt yuv444p sintel_clip.y4m
 
+##### Pie Test #####
+# PieTest - talking heads 720p lossy
+wget http://teeks99.com/PieTest.mkv
+
+##### #####
