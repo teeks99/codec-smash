@@ -10,12 +10,11 @@ This test is strictly single threaded, as some of the codecs will utilize multip
 #TODO:
 # - Load inputs as JSON
 # - Command line arguments
-# - CPU time
 # - Allow for cropping of images
 # - Put images together into a video (write the name of the file on each image)
 # - Concatenate all the videos for each test into one with text between clips (reach goal)
 # - Option to skip conversion (output file must already be in place)
-# - Write pretty sizes of files
+# - Javascript image comparison browser (allow flashing between any two selections)
 
 # Here you can enter files that you want to test out
 # For some you may want to specify a seperate video and audio file to both be processed.  Follow the sintel example for that.
@@ -149,14 +148,28 @@ tests=[
 ["ffmpeg INPUT_FILES " + no_video + " -acodec CODEC -threads 0 INPUT_NAME-CODEC-lossless.m4a"],
 "output":"INPUT_NAME-CODEC-lossless.m4a",
 "variables":[
-{"name":"CODEC","values":["alac"]}
+{"name":"CODEC","values":["around_sigfigs(lac"]}
 ]}
 ]
 
+import os
 import os.path
 from subprocess import call
 import time
 import shlex
+import math
+
+def filesize_format(size_in_bytes,base=1000):
+    byteunits = ()
+    if base == 1000:
+        byteunits = ('B', 'KB', 'MB', 'GB', 'TB', 'PB')
+    elif base == 1024:
+        byteunits = ('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB')
+    exponent = int(math.log(size_in_bytes, base))
+    return float(size_in_bytes) / pow(base, exponent), byteunits[exponent]
+
+def round_sigfigs(value, significant):
+    return round(value, int(significant - math.ceil(math.log10(abs(value)))))
 
 def variable_combinations(variables):
     """ Finds all possible combinations of the variables
@@ -364,20 +377,25 @@ class FFMpegTester():
         self.results.write("    <a href=\"" + output + "\">" + output + "</a><br>\n") #Jumping the gun a bit
         # TODO start CPU timer...is it possible?
         start = time.time()
+        os_start = os.times()
         for cmd in cmds:
             c = shlex.split(cmd)
             print cmd
             self.results.write("    " + cmd + "<br>\n") 
             call(c)
+        os_stop = os.times()
         stop = time.time()
         elapsed = stop - start
+        os_elapsed = os_stop[2] - os_start[2] + os_stop[3] - os_stop[3]
         self.results.write("   </td>\n")
-        self.results.write("   <td>" + str(elapsed) + "s</td>\n")
-        self.results.write("   <td></td>\n")
+        self.results.write("   <td>" + str(round_sigfigs(elapsed,4)) + "s</td>\n")
+        self.results.write("   <td>" + str(round_sigfigs(os_elapsed,4)) + "s</td>\n")
 
         # Get size of output file
-        size = os.path.getsize(output)
-        self.results.write("   <td>" + str(size) + "B</td>\n")
+        s = os.path.getsize(output)
+        size, units = filesize_format(s)
+        size = round_sigfigs(size, 3)
+        self.results.write("   <td>" + str(size) + units + "</td>\n")
 
         # Create Image for each image point
         self.results.write("   <td>")
@@ -391,3 +409,4 @@ class FFMpegTester():
 if __name__ == '__main__':
     t = FFMpegTester()
     t.run()
+
