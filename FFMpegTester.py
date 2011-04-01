@@ -21,7 +21,7 @@ This test is strictly single threaded, as some of the codecs will utilize multip
 # For some you may want to specify a seperate video and audio file to both be processed.  Follow the sintel example for that.
 # You can also specify points in the output file (in seconds) to record a png image, so quality can be looked at without running each video.
 test_input_files=[
-{"name":"PieTest","files":["PieTest.mkv"],"image_points":[{'sec':"3",'w':'640','h':'480','x':'0','y':'0'},{'sec':"12",'w':'640','h':'480','x':'0','y':'0'}]}
+{"name":"PieTest","files":["PieTest.mkv"],"image_points":[{'sec':"3",'w':'640','h':'480','x':'480','y':'100'},{'sec':"12",'w':'640','h':'480','x':'480','y':'100'}]}
 #, {"name":"sintel_clip","files":["sintel_clip.y4m","sintel_clip.flac"],"image_points":["2","5","7","9.560"]}
 #, {"name":"sintel_trailer","files":["sintel_trailer-video.y4m", "sintel_trailer-audio.flac"], "image_points":["3","15"]}
 ]
@@ -267,7 +267,7 @@ class TestPoints():
                         y = point['crop']['y']
                     except KeyError:
                         pass
-                cmd = 'mogrify -resize ' + w+'x'+h+'+'+x+'+'+y + img 
+                cmd = 'mogrify -crop ' + w+'x'+h+'+'+x+'+'+y+' ' + img 
                 call(shlex.split(cmd))
             except KeyError:
                 pass
