@@ -4,16 +4,27 @@
 This will iterate through multiple tests with multiple different codecs and options and give you 
 retults.html when you're done.
 
-This test is strictly single threaded, as some of the codecs will utilize multiple processors if they are available, thus we want to only run one test at a time (so we don't get two multi-processor tests at the same time, competing for CPU).
+This test is strictly single threaded, as some of the codecs will utilize multiple processors if 
+they are available, thus we want to only run one test at a time (so we don't get two multi-processor 
+tests at the same time, competing for CPU).
 '''
 
 #TODO:
 # - Load inputs as JSON
+#   - Test input(s)
+#   - Test case(s)
+#   - Test variable shortcuts? (find/replace...use FILL_XXXX notation)
 # - Command line arguments
-# - Allow for cropping of images
-# - Put images together into a video (write the name of the file on each image)
-# - Concatenate all the videos for each test into one with text between clips (reach goal)
-# - Option to skip conversion (output file must already be in place)
+#   - Option to skip conversion (output file must already be in place)
+#   - Number of threads
+#   - JSON Files
+#   - Basic input
+#   - basic test? default test?
+#   - Zoom in on cropped images???  (640x480 video pixels shows up as a 1280x960 image)
+# - Put images together into a video
+#   - Show each image for X seconds
+#   - Use image magick to put the name of the video in the bottom corner of each image
+# - Concatenate all the videos for each test into one with text between clips (long-range goal)
 # - Javascript image comparison browser (allow flashing between any two selections)
 
 # Here you can enter files that you want to test out
@@ -321,7 +332,8 @@ class FFMpegTester():
 
         self.results.write("</p>\n")
         self.results.write('<table style="text-align: left; width: 100%;" border="1" ')
-        self.results.write('cellpadding="2" cellspacing="2"><tbody>\n')
+        self.results.write('cellpadding="2" cells# - Option to skip conversion (output file must already be in place)
+pacing="2"><tbody>\n')
         self.results.write('  <tr>\n')
         self.results.write("   <td><b>No.</b></td>\n")
         self.results.write("   <td><b>Test Title</b></td>\n")
