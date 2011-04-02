@@ -64,6 +64,9 @@ def remove_comments(source):
     return out
 
 def filesize_format(size_in_bytes,base=1000):
+    if size_in_bytes <= 0:
+        return 0, 'B'
+
     byteunits = ()
     if base == 1000:
         byteunits = ('B', 'KB', 'MB', 'GB', 'TB', 'PB')
@@ -243,7 +246,7 @@ class FFMpegTester():
 
         self.results.write("<html>\n<head><title>FFMpegTester Results</title></head>\n")
         self.results.write("<body>\n") 
-        self.results.write("<p>Screen Capture Comparison Pages:\n")
+        self.results.write("<p>Screen Capture Comparison Pages:<br />\n")
 
         self.results.write(self.tps.html_segment())
 
