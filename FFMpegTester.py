@@ -123,11 +123,13 @@ def variable_combinations(variables):
 
 class TestPoints():
     def __init__(self, points, test_name):
-        cmd = "mkdir -p img thumb frames"
-        call(shlex.split(cmd))
-
         self.tp = {}
         self.test_name = test_name
+        
+        self.crop_zoom_multiplier = 1 # setting this equal to 2 will double the H&W dimensions
+
+        cmd = "mkdir -p img thumb frames"
+        call(shlex.split(cmd))
         
         for point in points:
             if point.__class__ == "".__class__: # If points is just a list of strings for times
@@ -155,6 +157,11 @@ class TestPoints():
         for point,info in self.tp.items():
             snip += '<a href="' + self.test_name + "_" + point + 's.html">' + self.test_name + "_" + point + 's</a><br />\n'
         return snip
+
+    def zoom_scale(self,w,h):
+        w = str(int( int(w)*self.crop_zoom_multiplier ))
+        h = str(int( int(h)*self.crop_zoom_multiplier ))
+        return w,h
 
     def grab_points(self, video_file):
         thumbs = []
@@ -187,8 +194,9 @@ class TestPoints():
                         y = point['crop']['y']
                     except KeyError:
                         pass
-                cmd = 'mogrify -crop ' + w+'x'+h+'+'+x+'+'+y+' ' + img 
-                call(shlex.split(str(cmd)))
+                    w,h = self.zoom_scale(w,h)
+                    cmd = 'mogrify -crop ' + w+'x'+h+'+'+x+'+'+y+' ' + img 
+                    call(shlex.split(str(cmd)))
             except KeyError:
                 pass
 
@@ -313,7 +321,8 @@ class FFMpegTester():
             print cmd
             self.results.write("    " + cmd + "<br>\n") 
             c = shlex.split(str(cmd))
-            call(c)
+            if self.run_conversion: # Only do re-processing, don't actually run
+                call(c)
         os_stop = os.times()
         stop = time.time()
         elapsed = stop - start
