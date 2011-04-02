@@ -14,6 +14,7 @@ tests at the same time, competing for CPU).
 #   - Test input(s)
 #   - Test case(s)
 #   - Test variable shortcuts? (find/replace...use FILL_XXXX notation)
+#   - Strip off # to end of line, to enable comments?
 # - Command line arguments
 #   - Option to skip conversion (output file must already be in place)
 #   - Number of threads
@@ -26,142 +27,8 @@ tests at the same time, competing for CPU).
 #   - Use image magick to put the name of the video in the bottom corner of each image
 # - Concatenate all the videos for each test into one with text between clips (long-range goal)
 # - Javascript image comparison browser (allow flashing between any two selections)
+# - Log command output to a text file for each trial
 
-# Here you can enter files that you want to test out
-# For some you may want to specify a seperate video and audio file to both be processed.  Follow the sintel example for that.
-# You can also specify points in the output file (in seconds) to record a png image, so quality can be looked at without running each video.
-test_input_files=[
-{"name":"PieTest","files":["PieTest.mkv"],"image_points":[{'sec':"3",'w':'640','h':'480','x':'480','y':'100'},{'sec':"12",'w':'640','h':'480','x':'480','y':'100'}]}
-#, {"name":"sintel_clip","files":["sintel_clip.y4m","sintel_clip.flac"],"image_points":["2","5","7","9.560"]}
-#, {"name":"sintel_trailer","files":["sintel_trailer-video.y4m", "sintel_trailer-audio.flac"], "image_points":["3","15"]}
-]
-
-# Here's some variables that can be used in the tests section
-thirteen_rates=["100", "250", "500", "750", "1000", "2000", "3000", "5000", "7500", "10000", "12500", "15000", "20000"]
-five_rates=["750", "1000", "3000", "5000", "10000"]
-two_rates=["1000", "5000"]
-standard_rates=two_rates
-default_audio="-acodec libfaac -ab 192k"
-low_audio="-acodec libvorbis -ab 64k"
-no_audio="-an"
-
-seven_audio_rates=["64", "96", "128", "192", "256", "320", "512"]
-three_audio_rates=["128", "192", "256"]
-standard_audio_rates=three_audio_rates
-default_video="-vcodec mpeg4 -b 500k"
-low_video="-vcodec mpeg4 -b 100k"
-no_video="-vn"
-
-manual_threads=str(4) # -threads 0 doesn't work for some codecs like libx264
-
-# Here you may enter tests.  Each test may have additional variables that will be iterated over to create sub-tests.  
-#INPUT_FILES is the group of files to be added in "-i name1 -i name2" format
-#INPUT_NAME is a special variable, from test_input_files[x]["name"], please no spaces
-tests=[
-{"title":"original","commands":
-["ffmpeg INPUT_FILES -vcodec copy -acodec copy INPUT_NAME-original.mkv"],
-"output":"INPUT_NAME-original.mkv"},
-
-{"title":"x264-2p-rates","commands":
-["ffmpeg INPUT_FILES -pass 1 -vcodec libx264 -vpre PRESET_firstpass -b RATEk -bt RATEk -an -threads " + manual_threads + " -f rawvideo -y /dev/null", 
-"ffmpeg INPUT_FILES -pass 2 -vcodec libx264 -vpre PRESET -b RATEk -bt RATEk " + default_audio + " -threads " + manual_threads + " INPUT_NAME-x264-PRESET-RATE-2p.mkv"],
-"output":"INPUT_NAME-x264-PRESET-RATE-2p.mkv",
-"variables":[
-{"name":"PRESET","values":["medium", "slow", "fast"]},
-{"name":"RATE","values":thirteen_rates}
-]},
-
-{"title":"x264-2p-fancy_presets","commands":
-["ffmpeg INPUT_FILES -pass 1 -vcodec libx264 -vpre PRESET_firstpass -b RATEk -bt RATEk -an -threads " + manual_threads + " -f rawvideo -y /dev/null", 
-"ffmpeg INPUT_FILES -pass 2 -vcodec libx264 -vpre PRESET -b RATEk -bt RATEk " + default_audio + " -threads " + manual_threads + " INPUT_NAME-x264-PRESET-RATE-2p.mkv"],
-"output":"INPUT_NAME-x264-PRESET-RATE-2p.mkv",
-"variables":[
-{"name":"PRESET","values":["faster", "slower", "superfast", "ultrafast", "veryfast", "veryslow"]},
-{"name":"RATE","values":two_rates}
-]},
-
-{"title":"x264-1p-rates","commands":
-["ffmpeg INPUT_FILES -vcodec libx264 -vpre PRESET -b RATEk -bt RATEk " + default_audio + " -threads " + manual_threads + " INPUT_NAME-x264-PRESET-RATE-1p.mkv"],
-"output":"INPUT_NAME-x264-PRESET-RATE-1p.mkv",
-"variables":[
-{"name":"PRESET","values":["medium", "slow", "fast"]},
-{"name":"RATE","values":thirteen_rates}
-]},
-
-{"title":"x264-1p-fancy_presets","commands":
-["ffmpeg INPUT_FILES -vcodec libx264 -vpre PRESET -b RATEk -bt RATEk " + default_audio + " -threads " + manual_threads + " INPUT_NAME-x264-PRESET-RATE-1p.mkv"],
-"output":"INPUT_NAME-x264-PRESET-RATE-1p.mkv",
-"variables":[
-{"name":"PRESET","values":["faster", "slower", "superfast", "ultrafast", "veryfast", "veryslow"]},
-{"name":"RATE","values":two_rates}
-]},
-
-{"title":"x264-lossless","commands":
-["ffmpeg INPUT_FILES -vcodec libx264 -vpre PRESET " + default_audio + " -threads " + manual_threads + " INPUT_NAME-x264-PRESET.mkv"],
-"output":"INPUT_NAME-x264-PRESET.mkv",
-"variables":[
-{"name":"PRESET","values":["lossless_fast", "lossless_max", "lossless_medium", "lossless_slower", "lossless_slow", "lossless_ultrafast"]}
-]},
-
-
-# snow doesn't seem to work with the Pie or Sintel clips.  It complains about pixel formats and gives up.
-# msmpeg4v1 looks like it works, but all the files only have audio in them (no video)
-# h263 has limited size options: 128x96, 176x144, 352x288, 704x576, and 1408x1152, none of which we're using here.  It refers to H.263+, but I'm not sure what that is.
-# wmv2 fails 2-pass because bitrate (even 10MB/s) is too low
-# libxvid works for the Pie but not for Sintel, says it has a bad pixel ratio 0/1
-{"title":"simple-1p","commands":
-["ffmpeg INPUT_FILES -vcodec CODEC -b RATEk " + default_audio + " -threads 0 INPUT_NAME-CODEC-RATE-1p.mkv"],
-"output":"INPUT_NAME-CODEC-RATE-1p.mkv",
-"variables":[
-{"name":"CODEC","values":["flv", "h263", "libschroedinger", "libtheora", "libvpx", "libxvid", "mjpeg", "mpeg2video", "mpeg4", "msmpeg4", "msmpeg4v1", "msmpeg4v2", "snow", "wmv2" ]},
-{"name":"RATE","values":five_rates}]},
-
-{"title":"simple-2p","commands":
-["ffmpeg INPUT_FILES -pass 1 -vcodec CODEC -b RATEk -bt RATEk -an -threads 0 -f rawvideo -y /dev/null",
-"ffmpeg INPUT_FILES -pass 2 -vcodec CODEC -b RATEk " + default_audio + " -threads 0 INPUT_NAME-CODEC-RATE-2p.mkv"],
-"output":"INPUT_NAME-CODEC-RATE-2p.mkv",
-"variables":[
-{"name":"CODEC","values":["flv", "h263", "libschroedinger", "libtheora", "libvpx", "libxvid", "mjpeg", "mpeg2video", "mpeg4", "msmpeg4", "msmpeg4v1", "msmpeg4v2", "wmv2" ]},
-{"name":"RATE","values":five_rates}]},
-
-{"title":"lossless","commands":
-["ffmpeg INPUT_FILES -vcodec CODEC " + default_audio + " -threads 0 INPUT_NAME-CODEC-lossless.mkv"],
-"output":"INPUT_NAME-CODEC-lossless.mkv",
-"variables":[
-{"name":"CODEC","values":["ffv1", "ffvhuff", "huffyuv"]}
-]},
-
-# aac causes the application to crap out so it has been removed
-# vorbis cause the application to crap out so it has been removed
-{"title":"audio","commands":
-["ffmpeg INPUT_FILES " + no_video + " -acodec CODEC -ab RATEk -threads 0 INPUT_NAME-CODEC-RATE.mkv"],
-"output":"INPUT_NAME-CODEC-RATE.mkv",
-"variables":[
-{"name":"CODEC","values":["ac3", "libfaac", "libmp3lame", "libvorbis", "wmav2"]},
-{"name":"RATE","values":seven_audio_rates}]},
-
-{"title":"low-rate-audio","commands":
-["ffmpeg INPUT_FILES " + no_video + " -acodec CODEC -ar 8000 -ac 1 -ab RATEk -threads 0 INPUT_NAME-CODEC-low_rate-RATE.mkv"],
-"output":"INPUT_NAME-CODEC-low_rate-RATE.mkv",
-"variables":[
-{"name":"CODEC","values":["g722", "g726", "libgsm", "libgsm_ms", "libmp3lame", "libopencore_amrnb", "libvorbis"]},
-{"name":"RATE","values":["6.7", "12.2", "13", "32", "48", "64"]}]},
-
-{"title":"lossless-audio","commands":
-["ffmpeg INPUT_FILES " + no_video + " -acodec CODEC -threads 0 INPUT_NAME-CODEC-lossless.mkv"],
-"output":"INPUT_NAME-CODEC-lossless.mkv",
-"variables":[
-{"name":"CODEC","values":["flac", "pcm_s16be"]} #pcm_s16be is CD-audio format
-]},
-
-# This needs to be sepearted out to use the m4a container, since it won't work in mkv (why not???)
-{"title":"lossless-audio-alac","commands":
-["ffmpeg INPUT_FILES " + no_video + " -acodec CODEC -threads 0 INPUT_NAME-CODEC-lossless.m4a"],
-"output":"INPUT_NAME-CODEC-lossless.m4a",
-"variables":[
-{"name":"CODEC","values":["around_sigfigs(lac"]}
-]}
-]
 
 import os
 import os.path
@@ -169,6 +36,36 @@ from subprocess import call
 import time
 import shlex
 import math
+import cStringIO
+import tokenize
+import json
+
+# This function will remove comments starting with # from a string
+# See: http://code.activestate.com/recipes/576704/ for any details, I removed the docstring part
+def remove_comments(source):
+    io_obj = cStringIO.StringIO(source)
+    out = ""
+    prev_toktype = tokenize.INDENT
+    last_lineno = -1
+    last_col = 0
+    for tok in tokenize.generate_tokens(io_obj.readline):
+        token_type = tok[0]
+        token_string = tok[1]
+        start_line, start_col = tok[2]
+        end_line, end_col = tok[3]
+        ltext = tok[4]
+        if start_line > last_lineno:
+            last_col = 0
+        if start_col > last_col:
+            out += (" " * (start_col - last_col))
+        if token_type == tokenize.COMMENT:
+            pass
+        else:
+            out += token_string
+        prev_toktype = token_type
+        last_col = end_col
+        last_lineno = end_line
+    return out
 
 def filesize_format(size_in_bytes,base=1000):
     byteunits = ()
@@ -265,16 +162,16 @@ class TestPoints():
         for point in self.tp.values():
             # Use ffmpeg to make a single frame png
             cmd = 'ffmpeg -i ' + video_file + ' -an -ss ' + point['sec'] + ' -an -r 1 -vframes 1 -y %d.png' 
-            call(shlex.split(cmd))
+            call(shlex.split(str(cmd)))
 
             img = 'img/' + video_file + "-" + point['sec'] + 's.png'
             # Move the output file to an appropriately named file in the img/ directory
             cmd = 'mv 1.png ' + img
-            call(shlex.split(cmd))
+            call(shlex.split(str(cmd)))
             # Keep the full frame in the frames dir
             frm = 'frames/'  + video_file + "-" + point['sec'] + 's.png'
             cmd = 'cp ' + img + ' ' + frm
-            call(shlex.split(cmd))
+            call(shlex.split(str(cmd)))
 
             # Make the img actually the cropped version
             try:
@@ -299,7 +196,7 @@ class TestPoints():
             thumb = 'thumb/' + video_file + "-" + point['sec'] + 's.png'
             # Create a thumbnail image in the thumb/ directory
             cmd = 'convert ' + img + ' -resize 100x100 ' + thumb
-            call(shlex.split(cmd))
+            call(shlex.split(str(cmd)))
 
             thumbs.append({'img':img,'thumb':thumb})
 
@@ -318,6 +215,30 @@ class FFMpegTester():
     def __init__(self):
         self.run_number = 0
 
+        # Hard coded options (change in future)
+        self.threads_var = 0
+        self.run_conversion = True
+        self.crop_zoom_multiplier = 1
+        
+        self.json_file = "test.json"
+        f = open(self.json_file,'r')
+        fstring = f.read()
+        f.close()
+        no_comment_string = remove_comments(fstring)
+        data = json.loads(no_comment_string)  # Really just need the vars
+        trim_data = {}
+        trim_data['input'] = data['input']
+        trim_data['tests'] = data['tests']
+        data_string = json.dumps(trim_data)
+        replaced_string = self.apply_variables(data_string, data['external_vars'])
+        self.data = json.loads(replaced_string)
+        self.data['external_vars'] = data['external_vars']
+        
+    def apply_variables(self, data, variables):
+        for k,v in variables.items():
+            data = data.replace(k,v)
+        return data
+
     def run(self):
         self.run_tests()
 
@@ -332,12 +253,11 @@ class FFMpegTester():
 
         self.results.write("</p>\n")
         self.results.write('<table style="text-align: left; width: 100%;" border="1" ')
-        self.results.write('cellpadding="2" cells# - Option to skip conversion (output file must already be in place)
-pacing="2"><tbody>\n')
+        self.results.write('cellpadding="2" cellspacing="2"><tbody>\n')
         self.results.write('  <tr>\n')
         self.results.write("   <td><b>No.</b></td>\n")
         self.results.write("   <td><b>Test Title</b></td>\n")
-        self.results.write("   <td><b>Output</b></td>\n")
+        self.results.write("   <td><b>Command(s)</b></td>\n")
         self.results.write("   <td><b>Elapsed Time (wall clock)</b></td>\n")
         self.results.write("   <td><b>CPU Time</b></td>\n")
         self.results.write("   <td><b>File Size</b></td>\n")
@@ -349,7 +269,7 @@ pacing="2"><tbody>\n')
         self.results.close()
 
     def run_tests(self):
-        for infile in test_input_files:
+        for infile in self.data['input']:
             self.tps = TestPoints(infile['image_points'], infile['name'])
             self.start_html(infile['name'])
             self.current_input_file = infile
@@ -357,7 +277,7 @@ pacing="2"><tbody>\n')
             input_files = ""
             for item in infile['files']:
                 input_files = input_files + " -i " + item
-            for test in tests:
+            for test in self.data['tests']:
                 self.current_test = test
                 vc = ""
                 try:
@@ -391,9 +311,9 @@ pacing="2"><tbody>\n')
         start = time.time()
         os_start = os.times()
         for cmd in cmds:
-            c = shlex.split(cmd)
             print cmd
             self.results.write("    " + cmd + "<br>\n") 
+            c = shlex.split(str(cmd))
             call(c)
         os_stop = os.times()
         stop = time.time()

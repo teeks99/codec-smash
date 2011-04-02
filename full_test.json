@@ -1,0 +1,248 @@
+# This is a special JSON file, in that it supports comments that start with a #.  If you want to send this file 
+# across the internet to a 3rd party, you should remove them first as their JSON parser may not accept them.
+f
+{
+"input":[
+    {
+        "name":"PieTest",
+        "files":["PieTest.mkv"],
+        "image_points":[
+            {"sec":"3","w":"640","h":"480","x":"480","y":"100"},
+            {"sec":"12","w":"640","h":"480","x":"480","y":"100"}
+        ]
+    }
+#, {"name":"sintel_clip","files":["sintel_clip.y4m","sintel_clip.flac"],"image_points":["2","5","7","9.560"]}
+#, {"name":"sintel_trailer","files":["sintel_trailer-video.y4m", "sintel_trailer-audio.flac"], "image_points":["3","15"]}
+]
+,
+"external_vars":{
+    "FILL_thirteen_rates":["100", "250", "500", "750", "1000", "2000", "3000", "5000", "7500", "10000", "12500", "15000", "20000"],
+    "FILL_five_rates":["750", "1000", "3000", "5000", "10000"],
+    "FILL_two_rates":["1000", "5000"],
+    "FILL_standard_rates":"FILL_two_rates",
+    "FILL_default_audio":"-acodec libfaac -ab 192k",
+    "FILL_low_audio":"-acodec libvorbis -ab 64k",
+    "FILL_no_audio":"-an",
+
+    "FILL_seven_audio_rates":["64", "96", "128", "192", "256", "320", "512"],
+    "FILL_three_audio_rates":["128", "192", "256"],
+    "FILL_standard_audio_rates":"FILL_three_audio_rates",
+    "FILL_default_video":"-vcodec mpeg4 -b 500k",
+    "FILL_low_video":"-vcodec mpeg4 -b 100k",
+    "FILL_no_video":"-vn",
+    
+    "FILL_manual_threads":"4"
+}
+,
+# Here you may enter tests.  Each test may have additional variables that will be iterated over to create sub-tests.  
+#INPUT_FILES is the group of files to be added in "-i name1 -i name2" format
+#INPUT_NAME is a special variable, from test_input_files[x]["name"], please no spaces
+"tests":[
+    {
+        "title":"original",
+        "commands":[
+            "ffmpeg INPUT_FILES -vcodec copy -acodec copy INPUT_NAME-original.mkv"
+        ],
+        "output":"INPUT_NAME-original.mkv"
+    },
+    {
+        "title":"x264-2p-rates",
+        "commands":[
+            "ffmpeg INPUT_FILES -pass 1 -vcodec libx264 -vpre PRESET_firstpass -b RATEk -bt RATEk -an -threads FILL_manual_threads -f rawvideo -y /dev/null", 
+            "ffmpeg INPUT_FILES -pass 2 -vcodec libx264 -vpre PRESET -b RATEk -bt RATEk FILL_default_audio -threads FILL_manual_threads INPUT_NAME-x264-PRESET-RATE-2p.mkv"
+        ],
+        "output":"INPUT_NAME-x264-PRESET-RATE-2p.mkv",
+        "variables":[
+            {"name":"PRESET","values":["medium", "slow", "fast"]},
+            {"name":"RATE","values":"FILL_thirteen_rates"}
+        ]
+    },
+    {
+        "title":"x264-2p-fancy_presets",
+        "commands":[
+            "ffmpeg INPUT_FILES -pass 1 -vcodec libx264 -vpre PRESET_firstpass -b RATEk -bt RATEk -an -threads FILL_manual_threads -f rawvideo -y /dev/null", 
+            "ffmpeg INPUT_FILES -pass 2 -vcodec libx264 -vpre PRESET -b RATEk -bt RATEk FILL_default_audio -threads FILL_manual_threads INPUT_NAME-x264-PRESET-RATE-2p.mkv"
+        ],
+        "output":"INPUT_NAME-x264-PRESET-RATE-2p.mkv",
+        "variables":[
+            {
+                "name":"PRESET",
+                "values":["faster", "slower", "superfast", "ultrafast", "veryfast", "veryslow"]
+            },
+            {"name":"RATE","values":"FILL_two_rates"}
+        ]
+    },
+    {
+        "title":"x264-1p-rates",
+        "commands":[
+            "ffmpeg INPUT_FILES -vcodec libx264 -vpre PRESET -b RATEk -bt RATEk FILL_default_audio -threads FILL_manual_threads INPUT_NAME-x264-PRESET-RATE-1p.mkv"
+        ],
+        "output":"INPUT_NAME-x264-PRESET-RATE-1p.mkv",
+        "variables":[
+            {"name":"PRESET","values":["medium", "slow", "fast"]},
+            {"name":"RATE","values":"FILL_thirteen_rates"}
+        ]
+    },
+    {
+        "title":"x264-1p-fancy_presets",
+        "commands":[
+            "ffmpeg INPUT_FILES -vcodec libx264 -vpre PRESET -b RATEk -bt RATEk FILL_default_audio -threads FILL_manual_threads INPUT_NAME-x264-PRESET-RATE-1p.mkv"
+        ],
+        "output":"INPUT_NAME-x264-PRESET-RATE-1p.mkv",
+        "variables":[
+            {"name":"PRESET","values":["faster", "slower", "superfast", "ultrafast", "veryfast", "veryslow"]},
+            {"name":"RATE","values":"FILL_two_rates"}
+        ]
+    },
+    {
+        "title":"x264-lossless",
+        "commands":[
+            "ffmpeg INPUT_FILES -vcodec libx264 -vpre PRESET FILL_default_audio -threads FILL_manual_threads INPUT_NAME-x264-PRESET.mkv"
+        ],
+        "output":"INPUT_NAME-x264-PRESET.mkv",
+        "variables":[
+            {
+                "name":"PRESET",
+                "values":[
+                    "lossless_fast", 
+                    "lossless_max", 
+                    "lossless_medium", 
+                    "lossless_slower", 
+                    "lossless_slow", 
+                    "lossless_ultrafast"
+                ]
+            }
+        ]
+    },
+    # snow doesn't seem to work with the Pie or Sintel clips.  It complains about pixel formats and gives up.
+    # msmpeg4v1 looks like it works, but all the files only have audio in them (no video)
+    # h263 has limited size options: 128x96, 176x144, 352x288, 704x576, and 1408x1152, none of which we're using here.  It refers to H.263+, but I'm not sure what that is.
+    # wmv2 fails 2-pass because bitrate (even 10MB/s) is too low
+    # libxvid works for the Pie but not for Sintel, says it has a bad pixel ratio 0/1
+    {
+        "title":"simple-1p",
+        "commands":[
+            "ffmpeg INPUT_FILES -vcodec CODEC -b RATEk FILL_default_audio -threads 0 INPUT_NAME-CODEC-RATE-1p.mkv"
+        ],
+        "output":"INPUT_NAME-CODEC-RATE-1p.mkv",
+        "variables":[
+            {
+                "name":"CODEC",
+                "values":[
+                    "flv", 
+                    "h263", 
+                    "libschroedinger", 
+                    "libtheora", 
+                    "libvpx", 
+                    "libxvid", 
+                    "mjpeg", 
+                    "mpeg2video", 
+                    "mpeg4", 
+                    "msmpeg4", 
+                    "msmpeg4v1", 
+                    "msmpeg4v2", 
+                    "snow", 
+                    "wmv2" 
+                ]
+            },
+            {"name":"RATE","values":"FILL_five_rates"}
+        ]
+    },
+    {
+        "title":"simple-2p",
+        "commands":[
+            "ffmpeg INPUT_FILES -pass 1 -vcodec CODEC -b RATEk -bt RATEk -an -threads 0 -f rawvideo -y /dev/null",
+            "ffmpeg INPUT_FILES -pass 2 -vcodec CODEC -b RATEk FILL_default_audio -threads 0 INPUT_NAME-CODEC-RATE-2p.mkv"
+        ],
+        "output":"INPUT_NAME-CODEC-RATE-2p.mkv",
+        "variables":[
+            {
+                "name":"CODEC",
+                "values":[
+                    "flv", 
+                    "h263", 
+                    "libschroedinger", 
+                    "libtheora", 
+                    "libvpx", 
+                    "libxvid", 
+                    "mjpeg", 
+                    "mpeg2video", 
+                    "mpeg4", 
+                    "msmpeg4", 
+                    "msmpeg4v1", 
+                    "msmpeg4v2", 
+                    "snow", 
+                    "wmv2" 
+                ]
+            },
+            {"name":"RATE","values":"FILL_five_rates"}
+        ]
+    },
+    {
+        "title":"lossless",
+        "commands":[
+            "ffmpeg INPUT_FILES -vcodec CODEC FILL_default_audio -threads 0 INPUT_NAME-CODEC-lossless.mkv"
+        ],
+        "output":"INPUT_NAME-CODEC-lossless.mkv",
+        "variables":[
+            {"name":"CODEC","values":["ffv1", "ffvhuff", "huffyuv"]}
+        ]
+    },
+    {
+        # aac causes the application to crap out so it has been removed.  
+        # vorbis cause the application to crap out so it has been removed
+        "title":"audio",
+        "commands":[
+            "ffmpeg INPUT_FILES FILL_no_video -acodec CODEC -ab RATEk -threads 0 INPUT_NAME-CODEC-RATE.mkv"
+        ],
+        "output":"INPUT_NAME-CODEC-RATE.mkv",
+        "variables":[
+            {"name":"CODEC","values":["ac3", "libfaac", "libmp3lame", "libvorbis", "wmav2"]},
+            {"name":"RATE","values":"FILL_seven_audio_rates"}
+        ]
+    },
+    {
+        "title":"low-rate-audio",
+        "commands":[
+            "ffmpeg INPUT_FILES FILL_no_video -acodec CODEC -ar 8000 -ac 1 -ab RATEk -threads 0 INPUT_NAME-CODEC-low_rate-RATE.mkv"
+        ],
+        "output":"INPUT_NAME-CODEC-low_rate-RATE.mkv",
+        "variables":[
+            {
+                "name":"CODEC",
+                "values":[
+                    "g722", 
+                    "g726", 
+                    "libgsm", 
+                    "libgsm_ms", 
+                    "libmp3lame", 
+                    "libopencore_amrnb", 
+                    "libvorbis"
+                ]
+            },
+            {"name":"RATE","values":["6.7", "12.2", "13", "32", "48", "64"]}
+        ]
+    },
+    {
+        "title":"lossless-audio",
+        "commands":[
+            "ffmpeg INPUT_FILES FILL_no_video -acodec CODEC -threads 0 INPUT_NAME-CODEC-lossless.mkv"
+        ],
+        "output":"INPUT_NAME-CODEC-lossless.mkv",
+        "variables":[
+            {"name":"CODEC","values":["flac", "pcm_s16be"]} #pcm_s16be is CD-audio format
+        ]
+    },
+    {
+        # This needs to be sepearted out to use the m4a container, since it won't work in mkv (why not???)
+        "title":"lossless-audio-alac",
+        "commands":[
+            "ffmpeg INPUT_FILES FILL_no_video -acodec CODEC -threads 0 INPUT_NAME-CODEC-lossless.m4a"
+        ],
+        "output":"INPUT_NAME-CODEC-lossless.m4a",
+        "variables":[
+            {"name":"CODEC","values":["around_sigfigs(lac"]}
+        ]
+     }
+]
+}

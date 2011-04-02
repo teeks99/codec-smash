@@ -1,0 +1,34 @@
+{
+"input":[
+    {
+        "name":"PieTest", 
+        "files":["PieTest.mkv"],
+        "image_points":[ 
+            {"sec":"3","w":"640","h":"480","x":"480","y":"100"}, 
+            {"sec":"12","w":"640","h":"480","x":"480","y":"100"}
+        ]
+    }
+]
+,
+"external_vars":{
+    "FILL_two_rates":"1000\", \"5000",
+    "FILL_default_audio":"-acodec libfaac -ab 192k",
+
+    "FILL_manual_threads":"4"
+}
+,
+"tests":[
+    {
+        "title":"x264-2p-rates",
+        "commands":[
+            "ffmpeg INPUT_FILES -pass 1 -vcodec libx264 -vpre PRESET_firstpass -b RATEk -bt RATEk -an -threads FILL_manual_threads -f rawvideo -y /dev/null", 
+            "ffmpeg INPUT_FILES -pass 2 -vcodec libx264 -vpre PRESET -b RATEk -bt RATEk FILL_default_audio -threads FILL_manual_threads INPUT_NAME-x264-PRESET-RATE-2p.mkv"
+        ],
+        "output":"INPUT_NAME-x264-PRESET-RATE-2p.mkv",
+        "variables":[
+            {"name":"PRESET","values":["faster", "veryfast", "ultrafast"]},
+            {"name":"RATE","values":["FILL_two_rates"]}
+        ]
+    }
+]
+}

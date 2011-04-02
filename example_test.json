@@ -1,0 +1,74 @@
+# This is a special JSON file, in that it supports comments that start with a #.  If you want to send this file 
+# across the internet to a 3rd party, you should remove them first as their JSON parser may not accept them.
+
+{
+"input":[ # You can run the tests (from the tests section) on as many input files as you like, make an entry for each one
+    {
+        # Name of this input identifier (please no spaces), this will be used for INPUT_NAME in the commands
+        "name":"PieTest", 
+        # All the files here.  They will be available in INPUT_FILES
+        "files":["PieTest.mkv"],
+        # Each one of these is a screen grab from the video, for evaluation.  The sec data is the number is the
+        # number of seconds into the video that the screen grab is taken.  It can then be cropped with WxH and
+        # X,Y for an offset down and right from the top left corner 
+        "image_points":[ 
+            {"sec":"3","w":"640","h":"480","x":"480","y":"100"}, 
+            {"sec":"12","w":"640","h":"480","x":"480","y":"100"}
+        ]
+    }
+    {
+        "name":"AnotherTest",
+        "files":"["A_File.mkv","PossiblyAudioTrack.flac"],
+        "image_points":[{"sec":"2.87"},{"sec":"148"}]
+    }
+]
+,
+# These key:value pairs will be replaced throughout this file before the file is loaded and run.  Make sure the keys 
+# are VERY unique!  I recommend prefacing them with FILL_ to denote that they are only to be used for replacing.
+# The biggest gotcha here is that everything must be a string, so you need to escape quotes
+"external_vars":{
+    "FILL_two_rates":"1000\", \"5000", # This will go inside a list ["FILL_two_rates"]
+    "FILL_default_audio":"-acodec libfaac -ab 192k",
+
+    "FILL_three_audio_rates":"128\", \"192\", \"256",
+    "FILL_default_video":"-vcodec mpeg4 -b 500k",
+    
+    "FILL_manual_threads":"4"
+}
+,
+# Here you may enter tests.  Each test may have additional variables that will be iterated over to create sub-tests.  
+#INPUT_FILES is the group of files to be added in "-i name1 -i name2" format
+#INPUT_NAME is a special variable, from test_input_files[x]["name"], please no spaces
+"tests":[
+    {
+        # I usually output the original file as well...for comparison. 
+        "title":"original", # This is the title of the test...used in the output file name
+        # Each command you execute needs to have a seperate entry in the list.          
+        "commands":[
+            "ffmpeg INPUT_FILES -vcodec copy -acodec copy INPUT_NAME-original.mkv"
+        ],
+        # This is the name of the file that will be output at the end of the commands
+        "output":"INPUT_NAME-original.mkv"
+    },
+    {
+        # Here's a more realistic example that sets up a 2-pass encoding with x264
+        "title":"x264-2p-rates",
+        "commands":[
+            # This uses the built in INPUT_FILES variable, as well as the PRESET and RATE variables from below.  
+            # In addition it takes the FILL_manual_threads variable from the external_vars section
+            "ffmpeg INPUT_FILES -pass 1 -vcodec libx264 -vpre PRESET_firstpass -b RATEk -bt RATEk -an -threads FILL_manual_threads -f rawvideo -y /dev/null", 
+            "ffmpeg INPUT_FILES -pass 2 -vcodec libx264 -vpre PRESET -b RATEk -bt RATEk FILL_default_audio -threads FILL_manual_threads INPUT_NAME-x264-PRESET-RATE-2p.mkv"
+        ],
+        # This also utilizes some of the variables
+        "output":"INPUT_NAME-x264-PRESET-RATE-2p.mkv",
+        # These variables are local to this test.  The FILL_two_rates will be replaced with ["1000","5000"] from the external_vars.
+        # Because of this, there will be six different combinations of variables that the commands in the commands section will run against:
+        # faster-1000, faster-5000, veryfast-1000, veryfast-5000, ultrafast-1000, ultrafast-5000
+        # If you use a lot of different variables here, this can compound quickly
+        "variables":[
+            {"name":"PRESET","values":["faster", "veryfast", "ultrafast"]},
+            {"name":"RATE","values":"FILL_two_rates"}
+        ]
+    }
+]
+} # End of the JSON object
