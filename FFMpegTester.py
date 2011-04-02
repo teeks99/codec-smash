@@ -10,24 +10,20 @@ tests at the same time, competing for CPU).
 '''
 
 #TODO:
-# - Load inputs as JSON
-#   - Test input(s)
-#   - Test case(s)
-#   - Test variable shortcuts? (find/replace...use FILL_XXXX notation)
-#   - Strip off # to end of line, to enable comments?
 # - Command line arguments
 #   - Option to skip conversion (output file must already be in place)
-#   - Number of threads
-#   - JSON Files
+#   - JSON File(s)
 #   - Basic input
 #   - basic test? default test?
 #   - Zoom in on cropped images???  (640x480 video pixels shows up as a 1280x960 image)
+#   - Override external_vars from the json file?
 # - Put images together into a video
 #   - Show each image for X seconds
 #   - Use image magick to put the name of the video in the bottom corner of each image
 # - Concatenate all the videos for each test into one with text between clips (long-range goal)
 # - Javascript image comparison browser (allow flashing between any two selections)
 # - Log command output to a text file for each trial
+# - Unit tests - esp for the standalone functions
 
 
 import os
@@ -189,7 +185,7 @@ class TestPoints():
                     except KeyError:
                         pass
                 cmd = 'mogrify -crop ' + w+'x'+h+'+'+x+'+'+y+' ' + img 
-                call(shlex.split(cmd))
+                call(shlex.split(str(cmd)))
             except KeyError:
                 pass
 
@@ -247,7 +243,7 @@ class FFMpegTester():
 
         self.results.write("<html>\n<head><title>FFMpegTester Results</title></head>\n")
         self.results.write("<body>\n") 
-        self.results.write("<p>\n")
+        self.results.write("<p>Screen Capture Comparison Pages:\n")
 
         self.results.write(self.tps.html_segment())
 

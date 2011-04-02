@@ -1,0 +1,33 @@
+{
+"input":[
+    {
+        "name":"PieTest", 
+        "files":["PieTest.mkv"],
+        "image_points":[ 
+            {"sec":"3","w":"640","h":"480","x":"480","y":"100"}, 
+            {"sec":"12","w":"640","h":"480","x":"480","y":"100"}
+        ]
+    }
+]
+,
+"external_vars":{
+    "FILL_two_rates":"1000\", \"5000",
+    "FILL_default_audio":"-acodec libfaac -ab 192k",
+
+    "FILL_manual_threads":"4"
+}
+,
+"tests":[
+    {
+        "title":"x264-1p-quick",
+        "commands":[
+            "ffmpeg INPUT_FILES -vcodec libx264 -vpre PRESET -b RATEk FILL_default_audio -threads FILL_manual_threads INPUT_NAME-x264-PRESET-RATE-1p.mkv"
+        ],
+        "output":"INPUT_NAME-x264-PRESET-RATE-1p.mkv",
+        "variables":[
+            {"name":"PRESET","values":["veryfast", "ultrafast"]},
+            {"name":"RATE","values":["FILL_two_rates"]}
+        ]
+    }
+]
+}
