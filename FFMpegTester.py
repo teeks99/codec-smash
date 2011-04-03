@@ -23,6 +23,8 @@ tests at the same time, competing for CPU).
 # - Log command output to a text file for each trial
 # - Unit tests - esp for the standalone functions
 # - Replace manual HTML output (esp for image pages) with a templating system
+# - Javascript Page
+#   - When no images selected, gray out things, write message?
 
 import os
 import os.path
@@ -254,9 +256,7 @@ class TestPoints():
                 images = all_options;
                 auto_box = document.control.automate_box;
                 auto_box.checked = true;
-                automate();
                 
-                //Test area
                 $.each(document.test_select, function(index, box){
                     $.each(all_options, function(index, test_img){
                         if( box.value == test_img.name ){
@@ -264,11 +264,13 @@ class TestPoints():
                         }
                     });
                 });
-                $.each(all_options, function(index, test_img){
-                    if( typeof test_img.box != "undefined"){
-                        test_img.box.checked = true;
-                    }
-                });
+                
+                if (all_options.length < 10){
+                    select_all();
+                }
+                else{
+                    select_none();
+                }
             });
             
             function change_image(){
@@ -315,6 +317,18 @@ class TestPoints():
             function check_changed(){
                 build_list();
             }
+            function select_all(){
+                $.each(document.test_select, function(index, box){
+                    box.checked = true;
+                });
+                build_list();
+            }
+            function select_none(){
+                $.each(document.test_select, function(index, box){
+                    box.checked = false;
+                });
+                build_list();
+            }
             
             function build_list(){
                 images = Array();
@@ -322,12 +336,15 @@ class TestPoints():
                 
                 $.each(all_options, function(index, test_img){
                     current_image = -1;
-                    if(test_img.box.checked){
-                        images[num_images] = test_img;
-                        num_images += 1;
-                        current_image = 0; // We have at least one image, initialize this                    
+                    if( typeof test_img.box != "undefined"){
+                        if(test_img.box.checked){
+                            images[num_images] = test_img;
+                            num_images += 1;
+                            current_image = 0; // We have at least one image, initialize this                    
+                        }
                     }
                     change_image();
+                    run_interval();
                 });
             }
             
@@ -344,7 +361,7 @@ class TestPoints():
         </form> 
         <form name="test_select" action"">   
             <p name="checkboxes"> Select the individual tests you would like to see above:<br />
-
+            <a href="#" onClick="javascript:select_all()">All</a>/<a href="#" onClick="javascript:select_none()">None</a><br />
 """
             for shot in point['complete']:
                 html += '                <input type="checkbox" value="' + shot['name'] + '" onClick="javascript:check_changed()"/>\n'
