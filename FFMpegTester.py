@@ -10,12 +10,7 @@ tests at the same time, competing for CPU).
 '''
 
 #TODO:
-# - Javascript image comparison browser (allow flashing between any two selections)
-#   - Select from checkboxes for test (or jquery selection?) 
-#      - Select all (default)
-#      - Select none
-#   - Checkbox for automate running
-#   - Update rate when changed (update button)
+# - Support zoom on cropped images
 # - Command line arguments
 #   - Option to skip conversion (output file must already be in place)
 #   - JSON File(s) (input)
@@ -27,7 +22,7 @@ tests at the same time, competing for CPU).
 # - Concatenate all the videos for each test into one with text between clips (long-range goal)
 # - Log command output to a text file for each trial
 # - Unit tests - esp for the standalone functions
-
+# - Replace manual HTML output (esp for image pages) with a templating system
 
 import os
 import os.path
@@ -132,6 +127,8 @@ class TestPoints():
         self.test_name = test_name
         
         self.crop_zoom_multiplier = 1 # setting this equal to 2 will double the H&W dimensions
+        self.output_html = True
+        self.output_json = False
 
         cmd = "mkdir -p img thumb frames"
         call(shlex.split(cmd))
@@ -194,7 +191,6 @@ class TestPoints():
                         y = point['crop']['y']
                     except KeyError:
                         pass
-                    w,h = self.zoom_scale(w,h)
                     cmd = 'mogrify -crop ' + w+'x'+h+'+'+x+'+'+y+' ' + img 
                     call(shlex.split(str(cmd)))
             except KeyError:
@@ -219,19 +215,21 @@ class TestPoints():
         return thumbs
         
     def make_json(self, point):
-        f = open(point['title']+'.json','w')
-        f.write(json.dumps(point['complete']))
-        f.close()
+        if self.output_json:
+            f = open(point['title']+'.json','w')
+            f.write(json.dumps(point['complete']))
+            f.close()
         
     def make_html(self, point):
-        html = """
+        if self.output_html:
+            html = """
 <!doctype html>
 <html>
     <head>
         <meta charset="utf-8">
 """
-        html += '        <title>' + point['title'] + '</title>'
-        html += """
+            html += '        <title>' + point['title'] + '</title>'
+            html += """
     </head>
     <body>
         <script src="jquery-1.5.2.js"></script>
@@ -243,15 +241,15 @@ class TestPoints():
             
             all_options = new Array();          
 """
-        index_number = 0
-        for shot in point['complete']:
-            html += '            all_options[' + str(index_number) + '] =  new Object();\n'
-            html += '            all_options[' + str(index_number) + '].name = "' + shot['name'] + '";\n'
-            html += '            all_options[' + str(index_number) + '].img = "' + shot['img'] + '";\n'
-            index_number += 1
-            
-        html += '            current_image = ' + str(index_number) + ';\n'
-        html += """
+            index_number = 0
+            for shot in point['complete']:
+                html += '            all_options[' + str(index_number) + '] =  new Object();\n'
+                html += '            all_options[' + str(index_number) + '].name = "' + shot['name'] + '";\n'
+                html += '            all_options[' + str(index_number) + '].img = "' + shot['img'] + '";\n'
+                index_number += 1
+                
+            html += '            current_image = ' + str(index_number) + ';\n'
+            html += """
             $(document).ready(function(){
                 images = all_options;
                 auto_box = document.control.automate_box;
@@ -348,24 +346,24 @@ class TestPoints():
             <p name="checkboxes"> Select the individual tests you would like to see above:<br />
 
 """
-        for shot in point['complete']:
-            html += '                <input type="checkbox" value="' + shot['name'] + '" onClick="javascript:check_changed()"/>\n'
-            html += shot['name'] + '<br />\n'
-        
-        html += '            </p>\n        </form>'
-
-        for shot in point['complete']:
-            html += '        <p>' + shot['name'] + '<br />\n'
-            html += '        <img src="' + shot['img'] + '">\n'
-            html += '        </p>\n' 
+            for shot in point['complete']:
+                html += '                <input type="checkbox" value="' + shot['name'] + '" onClick="javascript:check_changed()"/>\n'
+                html += shot['name'] + '<br />\n'
             
-        html += """
+            html += '            </p>\n        </form>'
+    
+            for shot in point['complete']:
+                html += '        <p>' + shot['name'] + '<br />\n'
+                html += '        <img src="' + shot['img'] + '">\n'
+                html += '        </p>\n' 
+                
+            html += """
      </body>
 </html>
 """
-        f = open(point['title']+'.html','w')
-        f.write(html)
-        f.close()
+            f = open(point['title']+'.html','w')
+            f.write(html)
+            f.close()
 
 class FFMpegTester():
     def __init__(self):
@@ -373,8 +371,8 @@ class FFMpegTester():
 
         # Hard coded options (change in future)
         self.threads_var = 0
-        #self.run_conversion = True
-        self.run_conversion = False
+        self.run_conversion = True
+        #self.run_conversion = False
         self.crop_zoom_multiplier = 1
                 
         self.json_file = "test.json"
