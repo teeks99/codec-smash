@@ -21,7 +21,13 @@ tests at the same time, competing for CPU).
 #   - Show each image for X seconds
 #   - Use image magick to put the name of the video in the bottom corner of each image
 # - Concatenate all the videos for each test into one with text between clips (long-range goal)
+# - Output HTML&JSON after *each* image generation (for full file or just images?)
 # - Javascript image comparison browser (allow flashing between any two selections)
+#   - Load in a seperate window?
+#   - Select from checkboxes for test (or jquery selection?)
+#   - Automated flashing (able to set delay)
+#   - Manual flash
+#   - Manual selection
 # - Log command output to a text file for each trial
 # - Unit tests - esp for the standalone functions
 
@@ -76,6 +82,8 @@ def filesize_format(size_in_bytes,base=1000):
     return float(size_in_bytes) / pow(base, exponent), byteunits[exponent]
 
 def round_sigfigs(value, significant):
+    if value == 0:
+        return 0
     return round(value, int(significant - math.ceil(math.log10(abs(value)))))
 
 def variable_combinations(variables):
@@ -145,12 +153,7 @@ class TestPoints():
     def setup(self, p, point, crop, test_name):
         p['crop'] = crop
         p['title'] = test_name + "_" + point +  "s"
-        p['file_name'] = p['title'] + ".html"
-
-        p['file'] = open(p['file_name'], "w")
-
-        p['file'].write("<html>\n<head><title>" + p['title'] + "</title></head>\n")
-        p['file'].write("<body>\n")
+        p['complete'] = []
         
     def html_segment(self):
         snip = ""
@@ -206,17 +209,114 @@ class TestPoints():
             call(shlex.split(str(cmd)))
 
             thumbs.append({'img':img,'thumb':thumb})
-
-            point['file'].write("<p>" + video_file + "<br />\n")
-            point['file'].write('<img src="' + img + '">\n</p>')
-            point['file'].flush()
+            
+            shot = {}
+            shot['name'] = video_file
+            shot['img'] = img
+            shot['thumb'] = thumb
+            shot['frame'] = frm
+            point['complete'].append(shot)
+            self.make_json(point)
+            self.make_html(point)
+          
         return thumbs
-
-    def close(self):
-        for point in self.tp.values():
-            point['file'].write("</body>\n")
-            point['file'].write("</html>\n")
-            point['file'].close()
+        
+    def make_json(self, point):
+        f = open(point['title']+'.json','w')
+        f.write(json.dumps(point['complete']))
+        f.close()
+        
+    def make_html(self, point):
+        html = """
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+"""
+        html += '        <title>' + point['title'] + '</title>'
+        html += """
+    </head>
+    <body>
+        <script src="jquery-1.5.2.js"></script>
+        <script>
+            var num_images = 0;
+            var current_image = 0;        
+            var auto = false;
+            var interval_id = 0;
+            
+            all_options = new Array();            
+"""
+        index_number = 0
+        for shot in point['complete']:
+            html += '            all_options[' + str(index_number) + '] =  new Object();\n'
+            html += '            all_options[' + str(index_number) + '].name = "' + shot['name'] + '";\n'
+            html += '            all_options[' + str(index_number) + '].img = "' + shot['img'] + '";\n'
+            index_number += 1
+            
+        html += '            current_image = ' + str(index_number) + ';\n'
+        html += """
+            
+            $(document).ready(function(){
+                images = all_options;
+                num_images = images.length;
+                automate();
+            });
+            
+            function change_image(){
+                img = images[current_image];
+                document.main_image.src = img.img;
+                document.getElementById('image_name').innerHTML = img.name + " Image:" + (current_image+1) + "/"+ num_images;
+            }
+            function goback(){ //Are there better ways to do this with iterators over an array?
+                current_image = current_image - 1;
+                if (current_image < 0){
+                    current_image = num_images-1;
+                }
+                change_image();
+            }
+            
+            function goforeward(){ //Are there better ways to do this with iterators over an array?
+                current_image = current_image + 1;
+                if (current_image >= num_images){
+                    current_image = 0;
+                }
+                change_image();
+            }
+            
+            function automate(){
+                auto = !auto;  // This could be replaced by the state of the button, or text in it?
+                interval = document.getElementById('interval_field').value;
+                if (auto){
+                    interval_id = setInterval(goforeward, interval);
+                }
+                else{
+                    clearInterval(interval_id);
+                }
+            }
+            
+        </script>
+        
+        <b id="image_name"></b> <br /> 
+        <img name="main_image" src="" /><br />
+        <form action="">
+            <input type="button" value="Back" onClick="javascript:goback()" /> &nbsp; &nbsp;
+            <input type="button" value="Automate" onClick="javascript:automate()" id="automate_btn" /> 
+            <input type="text" value="1000" size="4" id="interval_field" />ms &nbsp; &nbsp; &nbsp;
+            <input type="button" value="Foreward" onClick="javascript:goforeward()" />
+        </form>
+"""
+        for shot in point['complete']:
+            html += '        <p>' + shot['name'] + '<br />\n'
+            html += '        <img src="' + shot['img'] + '">\n'
+            html += '        </p>\n' 
+            
+        html += """
+     </body>
+</html>
+"""
+        f = open(point['title']+'.html','w')
+        f.write(html)
+        f.close()
 
 class FFMpegTester():
     def __init__(self):
@@ -224,9 +324,10 @@ class FFMpegTester():
 
         # Hard coded options (change in future)
         self.threads_var = 0
-        self.run_conversion = True
+        #self.run_conversion = True
+        self.run_conversion = False
         self.crop_zoom_multiplier = 1
-        
+                
         self.json_file = "test.json"
         f = open(self.json_file,'r')
         fstring = f.read()
@@ -278,7 +379,10 @@ class FFMpegTester():
     def run_tests(self):
         for infile in self.data['input']:
             self.tps = TestPoints(infile['image_points'], infile['name'])
+            self.tps.crop_zoom_multiplier = self.crop_zoom_multiplier
+
             self.start_html(infile['name'])
+
             self.current_input_file = infile
             input_name = infile['name']
             input_files = ""
@@ -303,7 +407,6 @@ class FFMpegTester():
                         for val in range(len(cmds)):
                             cmds[val] = cmds[val].replace(name, value)
                     self.run_test_version(cmds, output)
-            self.tps.close()
             self.finish_html()
 
     def run_test_version(self, cmds, output):
@@ -345,6 +448,8 @@ class FFMpegTester():
         self.results.write("   </td>\n")
         self.results.write("  </tr>\n")
         self.results.flush()
+        
+        
 
 if __name__ == '__main__':
     t = FFMpegTester()
