@@ -10,24 +10,21 @@ tests at the same time, competing for CPU).
 '''
 
 #TODO:
+# - Javascript image comparison browser (allow flashing between any two selections)
+#   - Select from checkboxes for test (or jquery selection?) 
+#      - Select all (default)
+#      - Select none
+#   - Checkbox for automate running
+#   - Update rate when changed (update button)
 # - Command line arguments
 #   - Option to skip conversion (output file must already be in place)
-#   - JSON File(s)
+#   - JSON File(s) (input)
+#   - JSON/HTML output
 #   - Basic input
 #   - basic test? default test?
 #   - Zoom in on cropped images???  (640x480 video pixels shows up as a 1280x960 image)
 #   - Override external_vars from the json file?
-# - Put images together into a video
-#   - Show each image for X seconds
-#   - Use image magick to put the name of the video in the bottom corner of each image
 # - Concatenate all the videos for each test into one with text between clips (long-range goal)
-# - Output HTML&JSON after *each* image generation (for full file or just images?)
-# - Javascript image comparison browser (allow flashing between any two selections)
-#   - Load in a seperate window?
-#   - Select from checkboxes for test (or jquery selection?)
-#   - Automated flashing (able to set delay)
-#   - Manual flash
-#   - Manual selection
 # - Log command output to a text file for each trial
 # - Unit tests - esp for the standalone functions
 
@@ -239,12 +236,12 @@ class TestPoints():
     <body>
         <script src="jquery-1.5.2.js"></script>
         <script>
-            var num_images = 0;
             var current_image = 0;        
             var auto = false;
+            var auto_box;
             var interval_id = 0;
             
-            all_options = new Array();            
+            all_options = new Array();          
 """
         index_number = 0
         for shot in point['complete']:
@@ -255,56 +252,108 @@ class TestPoints():
             
         html += '            current_image = ' + str(index_number) + ';\n'
         html += """
-            
             $(document).ready(function(){
                 images = all_options;
-                num_images = images.length;
+                auto_box = document.control.automate_box;
+                auto_box.checked = true;
                 automate();
+                
+                //Test area
+                $.each(document.test_select, function(index, box){
+                    $.each(all_options, function(index, test_img){
+                        if( box.value == test_img.name ){
+                            test_img.box = box;
+                        }
+                    });
+                });
+                $.each(all_options, function(index, test_img){
+                    if( typeof test_img.box != "undefined"){
+                        test_img.box.checked = true;
+                    }
+                });
             });
             
             function change_image(){
-                img = images[current_image];
-                document.main_image.src = img.img;
-                document.getElementById('image_name').innerHTML = img.name + " Image:" + (current_image+1) + "/"+ num_images;
+                if((current_image >= 0) && (current_image < images.length)){
+                    img = images[current_image];
+                    document.main_image.src = img.img;
+                    document.getElementById('image_name').innerHTML = img.name + " Image:" + (current_image+1) + "/"+ images.length;
+                }
             }
             function goback(){ //Are there better ways to do this with iterators over an array?
                 current_image = current_image - 1;
                 if (current_image < 0){
-                    current_image = num_images-1;
+                    current_image = images.length-1;
                 }
                 change_image();
             }
             
             function goforeward(){ //Are there better ways to do this with iterators over an array?
                 current_image = current_image + 1;
-                if (current_image >= num_images){
+                if (current_image >= images.length){
                     current_image = 0;
                 }
                 change_image();
             }
             
-            function automate(){
-                auto = !auto;  // This could be replaced by the state of the button, or text in it?
+            function run_interval(){
                 interval = document.getElementById('interval_field').value;
-                if (auto){
+                if (auto_box.checked){
+                    clearInterval(interval_id);
                     interval_id = setInterval(goforeward, interval);
                 }
                 else{
                     clearInterval(interval_id);
                 }
             }
+            function automate(){
+                run_interval();
+            }
+            
+            function update_btn(){
+                run_interval();
+            }
+            
+            function check_changed(){
+                build_list();
+            }
+            
+            function build_list(){
+                images = Array();
+                num_images = 0;
+                
+                $.each(all_options, function(index, test_img){
+                    current_image = -1;
+                    if(test_img.box.checked){
+                        images[num_images] = test_img;
+                        num_images += 1;
+                        current_image = 0; // We have at least one image, initialize this                    
+                    }
+                    change_image();
+                });
+            }
             
         </script>
         
         <b id="image_name"></b> <br /> 
         <img name="main_image" src="" /><br />
-        <form action="">
+        <form name="control" action="">
             <input type="button" value="Back" onClick="javascript:goback()" /> &nbsp; &nbsp;
-            <input type="button" value="Automate" onClick="javascript:automate()" id="automate_btn" /> 
-            <input type="text" value="1000" size="4" id="interval_field" />ms &nbsp; &nbsp; &nbsp;
+            <input type="checkbox" name="automate_box" onClick="javascript:automate()"/> Automate &nbsp; &nbsp; &nbsp; 
+            <input type="text" value="1000" size="4" id="interval_field" />ms 
+            <input type="button" value="Update" onClick="javascript:update_btn()" />&nbsp; &nbsp; &nbsp;
             <input type="button" value="Foreward" onClick="javascript:goforeward()" />
-        </form>
+        </form> 
+        <form name="test_select" action"">   
+            <p name="checkboxes"> Select the individual tests you would like to see above:<br />
+
 """
+        for shot in point['complete']:
+            html += '                <input type="checkbox" value="' + shot['name'] + '" onClick="javascript:check_changed()"/>\n'
+            html += shot['name'] + '<br />\n'
+        
+        html += '            </p>\n        </form>'
+
         for shot in point['complete']:
             html += '        <p>' + shot['name'] + '<br />\n'
             html += '        <img src="' + shot['img'] + '">\n'
