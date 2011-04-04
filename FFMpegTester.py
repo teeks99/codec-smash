@@ -10,7 +10,6 @@ tests at the same time, competing for CPU).
 '''
 
 #TODO:
-# - Support zoom on cropped images
 # - Command line arguments
 #   - Option to skip conversion (output file must already be in place)
 #   - JSON File(s) (input)
@@ -25,6 +24,8 @@ tests at the same time, competing for CPU).
 # - Replace manual HTML output (esp for image pages) with a templating system
 # - Javascript Page
 #   - When no images selected, gray out things, write message?
+#   - Tabs settings?
+#   - Pressing return selects foreward, rate update, or zoom update depending on cursor
 
 import os
 import os.path
@@ -128,7 +129,6 @@ class TestPoints():
         self.tp = {}
         self.test_name = test_name
         
-        self.crop_zoom_multiplier = 1 # setting this equal to 2 will double the H&W dimensions
         self.output_html = True
         self.output_json = False
 
@@ -138,18 +138,16 @@ class TestPoints():
         for point in points:
             if point.__class__ == "".__class__: # If points is just a list of strings for times
                 self.tp[point] = {'sec':point}
-                crop = {'w':'0','h':'0'}
-                self.setup(self.tp[point], point, crop, test_name)
+                self.tp[pt]['title'] = test_name + "_" + point +  "s"
+                self.tp[pt]['complete'] = []
             elif point.__class__ == {}.__class__:
                 pt = point['sec'] 
                 self.tp[pt] = {"sec":pt}
-                crop = {'w':point['w'],'h':point['h'],'x':point['x'],'y':point['y']}
-                self.setup(self.tp[pt], pt, crop, test_name)
+                self.tp[pt]['crop'] = {'w':point['w'],'h':point['h'],'x':point['x'],'y':point['y']}
+                self.tp[pt]['title'] = test_name + "_" + point +  "s"
+                self.tp[pt]['complete'] = []
 
     def setup(self, p, point, crop, test_name):
-        p['crop'] = crop
-        p['title'] = test_name + "_" + point +  "s"
-        p['complete'] = []
         
     def html_segment(self):
         snip = ""
@@ -182,19 +180,10 @@ class TestPoints():
             try:
                 w = point['crop']['w']
                 h = point['crop']['h']
-                if w!='0' and h!='0':
-                    x = 0
-                    y = 0
-                    try:
-                        x = point['crop']['x']
-                    except KeyError:
-                        pass
-                    try:
-                        y = point['crop']['y']
-                    except KeyError:
-                        pass
-                    cmd = 'mogrify -crop ' + w+'x'+h+'+'+x+'+'+y+' ' + img 
-                    call(shlex.split(str(cmd)))
+                x = point['crop']['x']
+                y = point['crop']['y']
+                cmd = 'mogrify -crop ' + w+'x'+h+'+'+x+'+'+y+' ' + img 
+                call(shlex.split(str(cmd)))
             except KeyError:
                 pass
 
@@ -250,7 +239,10 @@ class TestPoints():
                 html += '            all_options[' + str(index_number) + '].img = "' + shot['img'] + '";\n'
                 index_number += 1
                 
-            html += '            current_image = ' + str(index_number) + ';\n'
+            html += '            var current_image = ' + str(index_number) + ';\n'
+            html += '            var width = ' str(point['crop']['w']) + ';\n'
+            html += '            var height = ' str(point['crop']['h']) + ';\n'
+            html += '            var zoom_multiplier = 1;\n'
             html += """
             $(document).ready(function(){
                 images = all_options;
@@ -329,7 +321,14 @@ class TestPoints():
                 });
                 build_list();
             }
-            
+            function change_zoom(){
+                var zoom = parseFloat(document.control.zoom_field.value);
+                if ((zoom != NaN) && (zoom > 0)){
+                    document.main_image.width = width * zoom;
+                    document.main_image.height = height * zoom;
+                }
+            }
+                        
             function build_list(){
                 images = Array();
                 num_images = 0;
@@ -353,11 +352,13 @@ class TestPoints():
         <b id="image_name"></b> <br /> 
         <img name="main_image" src="" /><br />
         <form name="control" action="">
-            <input type="button" value="Back" onClick="javascript:goback()" /> &nbsp; &nbsp;
+            <input type="button" value="Back" onClick="javascript:goback()" /> 
+            <input type="button" value="Foreward" onClick="javascript:goforeward()" /><br />
             <input type="checkbox" name="automate_box" onClick="javascript:automate()"/> Automate &nbsp; &nbsp; &nbsp; 
             <input type="text" value="1000" size="4" id="interval_field" />ms 
             <input type="button" value="Update" onClick="javascript:update_btn()" />&nbsp; &nbsp; &nbsp;
-            <input type="button" value="Foreward" onClick="javascript:goforeward()" />
+            Zoom: <input type="text" value="1.0" size="2" name="zoom_field" />
+            <input type="button" value="Update" onClick="javascript:change_zoom()"/>
         </form> 
         <form name="test_select" action"">   
             <p name="checkboxes"> Select the individual tests you would like to see above:<br />
@@ -387,10 +388,8 @@ class FFMpegTester():
         self.run_number = 0
 
         # Hard coded options (change in future)
-        self.threads_var = 0
         self.run_conversion = True
         #self.run_conversion = False
-        self.crop_zoom_multiplier = 1
                 
         self.json_file = "test.json"
         f = open(self.json_file,'r')
@@ -443,7 +442,6 @@ class FFMpegTester():
     def run_tests(self):
         for infile in self.data['input']:
             self.tps = TestPoints(infile['image_points'], infile['name'])
-            self.tps.crop_zoom_multiplier = self.crop_zoom_multiplier
 
             self.start_html(infile['name'])
 
