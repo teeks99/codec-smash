@@ -12,16 +12,16 @@ tests at the same time, competing for CPU).
 #TODO:
 # - Command line arguments
 #   - Option to skip conversion (output file must already be in place)
-#   - JSON File(s) (input)
+#   - JSON File (input)
 #   - JSON/HTML output
 #   - Basic input
 #   - basic test? default test?
-#   - Zoom in on cropped images???  (640x480 video pixels shows up as a 1280x960 image)
 #   - Override external_vars from the json file?
 # - Concatenate all the videos for each test into one with text between clips (long-range goal)
 # - Log command output to a text file for each trial
 # - Unit tests - esp for the standalone functions
 # - Replace manual HTML output (esp for image pages) with a templating system
+# - Enable full HTML disabling
 # - Javascript Page
 #   - When no images selected, gray out things, write message?
 #   - Tabs settings?
@@ -36,6 +36,7 @@ import math
 import cStringIO
 import tokenize
 import json
+from optparse import OptionParser
 
 # This function will remove comments starting with # from a string
 # See: http://code.activestate.com/recipes/576704/ for any details, I removed the docstring part
@@ -144,10 +145,8 @@ class TestPoints():
                 pt = point['sec'] 
                 self.tp[pt] = {"sec":pt}
                 self.tp[pt]['crop'] = {'w':point['w'],'h':point['h'],'x':point['x'],'y':point['y']}
-                self.tp[pt]['title'] = test_name + "_" + point +  "s"
+                self.tp[pt]['title'] = test_name + "_" + point['sec'] +  "s"
                 self.tp[pt]['complete'] = []
-
-    def setup(self, p, point, crop, test_name):
         
     def html_segment(self):
         snip = ""
@@ -240,8 +239,8 @@ class TestPoints():
                 index_number += 1
                 
             html += '            var current_image = ' + str(index_number) + ';\n'
-            html += '            var width = ' str(point['crop']['w']) + ';\n'
-            html += '            var height = ' str(point['crop']['h']) + ';\n'
+            html += '            var width = ' + str(point['crop']['w']) + ';\n'
+            html += '            var height = ' + str(point['crop']['h']) + ';\n'
             html += '            var zoom_multiplier = 1;\n'
             html += """
             $(document).ready(function(){
@@ -292,7 +291,7 @@ class TestPoints():
                 interval = document.getElementById('interval_field').value;
                 if (auto_box.checked){
                     clearInterval(interval_id);
-                    interval_id = setInterval(goforeward, interval);
+                    interval_id = setInterval(goforward, interval);
                 }
                 else{
                     clearInterval(interval_id);
@@ -366,7 +365,7 @@ class TestPoints():
 """
             for shot in point['complete']:
                 html += '                <input type="checkbox" value="' + shot['name'] + '" onClick="javascript:check_changed()"/>\n'
-                html += shot['name'] + '<br />\n'
+                html += '                ' + shot['name'] + '<br />\n'
             
             html += '            </p>\n        </form>'
     
@@ -391,8 +390,18 @@ class FFMpegTester():
         self.run_conversion = True
         #self.run_conversion = False
                 
-        self.json_file = "test.json"
-        f = open(self.json_file,'r')
+        self.input_file = "test.json"
+        self.output_html = True
+        self.output_json = False
+        
+        
+    def apply_variables(self, data, variables):
+        for k,v in variables.items():
+            data = data.replace(k,v)
+        return data
+
+    def run(self):
+        f = open(self.input_file,'r')
         fstring = f.read()
         f.close()
         no_comment_string = remove_comments(fstring)
@@ -404,13 +413,7 @@ class FFMpegTester():
         replaced_string = self.apply_variables(data_string, data['external_vars'])
         self.data = json.loads(replaced_string)
         self.data['external_vars'] = data['external_vars']
-        
-    def apply_variables(self, data, variables):
-        for k,v in variables.items():
-            data = data.replace(k,v)
-        return data
-
-    def run(self):
+       
         self.run_tests()
 
     def start_html(self, name):
@@ -510,10 +513,22 @@ class FFMpegTester():
         self.results.write("   </td>\n")
         self.results.write("  </tr>\n")
         self.results.flush()
-        
-        
 
 if __name__ == '__main__':
+    parser = OptionParser()
+    parser.add_option("-i", "--input", dest="input", help="A JSON file containing the data to run", default="test.json")
+    parser.add_option("-w", "--html", action="store_true", dest="output_html", default=False, help="Output HTML web-page for each image sample")
+    parser.add_option("-j", "--json", action="store_true", dest="output_json", default=False, help="Output JSON for each set of images")
+    parser.add_option("-c", "--no_conversion", action="store_false", dest="conversion", default=True, help="Disable the actual conversion commands, only do post-processing")
+
+    (options, args) = parser.parse_args()
+    
     t = FFMpegTester()
+    
+    t.run_conversion = options.conversion
+    t.input_file = options.input
+    t.output_html = options.output_html
+    t.output_json = options.output_json
+    
     t.run()
 
