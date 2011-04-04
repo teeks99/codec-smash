@@ -25,7 +25,7 @@ tests at the same time, competing for CPU).
 # - Javascript Page
 #   - When no images selected, gray out things, write message?
 #   - Tabs settings?
-#   - Pressing return selects foreward, rate update, or zoom update depending on cursor
+#   - Pressing return selects forward, rate update, or zoom update depending on cursor
 
 import os
 import os.path
@@ -280,7 +280,7 @@ class TestPoints():
                 change_image();
             }
             
-            function goforeward(){ //Are there better ways to do this with iterators over an array?
+            function goforward(){ //Are there better ways to do this with iterators over an array?
                 current_image = current_image + 1;
                 if (current_image >= images.length){
                     current_image = 0;
@@ -353,7 +353,7 @@ class TestPoints():
         <img name="main_image" src="" /><br />
         <form name="control" action="">
             <input type="button" value="Back" onClick="javascript:goback()" /> 
-            <input type="button" value="Foreward" onClick="javascript:goforeward()" /><br />
+            <input type="button" value="Forward" onClick="javascript:goforward()" /><br />
             <input type="checkbox" name="automate_box" onClick="javascript:automate()"/> Automate &nbsp; &nbsp; &nbsp; 
             <input type="text" value="1000" size="4" id="interval_field" />ms 
             <input type="button" value="Update" onClick="javascript:update_btn()" />&nbsp; &nbsp; &nbsp;
