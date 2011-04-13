@@ -26,6 +26,7 @@ tests at the same time, competing for CPU).
 #   - When no images selected, gray out things, write message?
 #   - Tabs settings?
 #   - Pressing return selects forward, rate update, or zoom update depending on cursor
+#   - Keyboard shortcuts (forward/back, automate?)
 
 import os
 import os.path
