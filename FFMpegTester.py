@@ -27,6 +27,7 @@ tests at the same time, competing for CPU).
 #   - Tabs settings?
 #   - Pressing return selects forward, rate update, or zoom update depending on cursor
 #   - Keyboard shortcuts (forward/back, automate?)
+# - Handle FFMpeg errors somehow
 
 import os
 import os.path
