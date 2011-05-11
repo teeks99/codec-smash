@@ -163,7 +163,7 @@ cd ..
 
 ##################################################
 echo "Re-Install ffmpeg, x264, or libvpx dependant stuff"
-sudo apt-get install kdenlive
+echo sudo apt-get install kdenlive dvd-slideshow qdvdauthor qdvdauthor-common videotrans
 
 # Don't do this stuff for now (bottom unreachable block)
 if [ "A" = "B" ] ; then
