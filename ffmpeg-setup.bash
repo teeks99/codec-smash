@@ -42,15 +42,16 @@ echo "Setup repos from canocial sources"
 git clone git://git.videolan.org/x264.git
 git clone git://review.webmproject.org/libvpx.git
 #git clone git://git.ffmpeg.org/ffmpeg.git
-git clone git://git.libav.org/libav.git
+git clone git://git.videolan.org/ffmpeg.git
+#git clone git://git.libav.org/libav.git
   ;;
 
   jp2-s1)
 echo "Setup repos from jp2-s1"
 git clone http://jp2-s1/src/x264.git
 git clone http://jp2-s1/src/libvpx.git
-#git clone http://jp2-s1/src/ffmpeg.git
-git clone http://jp2-s1/src/libav.git
+git clone http://jp2-s1/src/ffmpeg.git
+#git clone http://jp2-s1/src/libav.git
   ;;
 
   none)
@@ -69,8 +70,8 @@ sudo apt-get -y remove libvpx-dev
 echo "Cleanup any source trees that have been built before"
 cd x264;   make distclean; git checkout master; git pull; cd ..
 cd libvpx; make clean;     git checkout master; git pull; cd ..
-#cd ffmpeg; make distclean; git checkout master; git pull; cd ..
-cd libav; make distclean; git checkout master; git pull; cd ..
+cd ffmpeg; make distclean; git checkout master; git pull; cd ..
+#cd libav; make distclean; git checkout master; git pull; cd ..
 
 echo "Go to the correct GIT Versions"
 # First Version
@@ -80,9 +81,15 @@ echo "Go to the correct GIT Versions"
 #cd libav; git checkout 4acc94e97a9551d11ead29735e23283d71f1d4c2; cd ..
 
 # Second Version
-cd x264;   git checkout b5a8ad7e0047ec65cb01d64b1151e358a7b84314; cd ..
-cd libvpx; git checkout ba6f60dba70ad56fbfd1080bb4555f078bc774bf; cd ..
-cd libav; git checkout b44c8ad280c221691560ae9625421416e20c483f; cd ..
+#cd x264;   git checkout b5a8ad7e0047ec65cb01d64b1151e358a7b84314; cd ..
+#cd libvpx; git checkout ba6f60dba70ad56fbfd1080bb4555f078bc774bf; cd ..
+#cd libav; git checkout b44c8ad280c221691560ae9625421416e20c483f; cd ..
+
+# Third Version
+cd x264;   git checkout 0ba8a9c6973897ec35e1a5d241a71f4f5a4f81aa; cd ..
+cd libvpx; git checkout v0.9.7; cd ..
+cd ffmpeg; git checkout n0.8.2; cd ..
+#cd libav; git checkout b44c8ad280c221691560ae9625421416e20c483f; cd ..
 
 sleep 5s
 
@@ -126,8 +133,8 @@ cd ..
 
 ##################################################
 echo "Build + Install ffmpeg"
-#cd ffmpeg
-cd libav
+cd ffmpeg
+#cd libav
 
 #ffmpeg config options, missing --enable-libopencv
 config_options="--enable-gpl --enable-version3 --enable-nonfree --enable-postproc --enable-x11grab --enable-vdpau --enable-bzlib --enable-pthreads --enable-zlib --enable-runtime-cpudetect --enable-frei0r --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libdc1394 --enable-libfaac --enable-libfreetype --enable-libgsm --enable-libmp3lame --enable-libopenjpeg --enable-libschroedinger --enable-libspeex --enable-libtheora --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libxvid"
