@@ -96,7 +96,7 @@ sleep 5s
 ##################################################
 echo "Build + Install x264"
 cd x264
-./configure
+./configure --enable-static
 make
 case $ver in
   lucid)
