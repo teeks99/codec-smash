@@ -87,8 +87,8 @@ echo "Go to the correct GIT Versions"
 
 # Third Version
 cd x264;   git checkout 0ba8a9c6973897ec35e1a5d241a71f4f5a4f81aa; cd ..
-cd libvpx; git checkout v0.9.7; cd ..
-cd ffmpeg; git checkout n0.8.2; cd ..
+cd libvpx; git checkout v0.9.7; cd .. #e28e08146e468c55e435d19b2c95654e04fe3044
+cd ffmpeg; git checkout n0.8.2; cd .. #d1bc77d86c5c8b013b371c1bf027f7583aef07b3
 #cd libav; git checkout b44c8ad280c221691560ae9625421416e20c483f; cd ..
 
 sleep 5s
