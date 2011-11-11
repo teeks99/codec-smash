@@ -81,10 +81,15 @@ echo "Go to the correct GIT Versions"
 #cd libav; git checkout b44c8ad280c221691560ae9625421416e20c483f; cd ..
 
 # Third Version
-cd x264;   git checkout 0ba8a9c6973897ec35e1a5d241a71f4f5a4f81aa; cd ..
-cd libvpx; git checkout v0.9.7; cd .. #e28e08146e468c55e435d19b2c95654e04fe3044
-cd ffmpeg; git checkout n0.8.2; cd .. #d1bc77d86c5c8b013b371c1bf027f7583aef07b3
+#cd x264;   git checkout 0ba8a9c6973897ec35e1a5d241a71f4f5a4f81aa; cd ..
+#cd libvpx; git checkout v0.9.7; cd .. #e28e08146e468c55e435d19b2c95654e04fe3044
+#cd ffmpeg; git checkout n0.8.2; cd .. #d1bc77d86c5c8b013b371c1bf027f7583aef07b3
 #cd libav; git checkout b44c8ad280c221691560ae9625421416e20c483f; cd ..
+
+# Fourth Version
+cd x264;   git checkout 07efeb45db224b7757880d4d63bb549fb454f6db; cd .. # Add fenc prefetchi...
+cd libvpx; git checkout v0.9.7-p1; cd .. #20307c70ae96c45b9b00338989b952fb334e4fc9 # Update CHANGEL...
+cd ffmpeg; git checkout n0.8.6; cd .. #1e1015fd223ff33a88585db13047ce766369c21b # Version numbe...
 
 sleep 5s
 
