@@ -35,7 +35,8 @@ case $repoLocation in
   canonical)
 echo "Setup repos from canocial sources"
 git clone git://git.videolan.org/x264.git
-git clone git://review.webmproject.org/libvpx.git
+#git clone git://review.webmproject.org/libvpx.git
+git clone http://git.chromium.org/webm/libvpx.git
 #git clone git://git.ffmpeg.org/ffmpeg.git
 git clone git://git.videolan.org/ffmpeg.git
 #git clone git://git.libav.org/libav.git
@@ -176,7 +177,7 @@ cd ..
 
 ##################################################
 echo "Re-Install ffmpeg, x264, or libvpx dependant stuff"
-echo sudo apt-get install kdenlive dvd-slideshow qdvdauthor qdvdauthor-common videotrans
+echo sudo apt-get install dvdrip k9copy kdenlive
 
 # Don't do this stuff for now (bottom unreachable block)
 if [ "A" = "B" ] ; then
