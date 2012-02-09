@@ -70,32 +70,11 @@ cd ffmpeg; make distclean; git checkout master; git pull; cd ..
 #cd libav; make distclean; git checkout master; git pull; cd ..
 
 echo "Go to the correct GIT Versions"
-# First Version
-#cd x264;   git checkout 5fd3dce0c72a40722df6a9bddf599980846f6fe8; cd ..
-#cd libvpx; git checkout 418f4219fac3b5c0d34fd49e46f40cf931520a03; cd ..
-#cd ffmpeg; git checkout 4acc94e97a9551d11ead29735e23283d71f1d4c2; cd ..
-#cd libav; git checkout 4acc94e97a9551d11ead29735e23283d71f1d4c2; cd ..
+# Sixth Version - Feb 9, 2012
+cd x264;   git checkout da19765d723b06a1fa189478e9da61a1c18490f8; cd .. # TBM, AVX2, FMA3, BMI1, and...
+cd libvpx; git checkout v1.0.0; cd .. #2b0aee4b5def280d4e27c11d1b95ecd8545eed34 # Update CHANGEL...
+cd ffmpeg; git checkout n0.10; cd .. #7e16636995fd6710164f7622cd77abc94c27a064 # doc: remove doc/f...
 
-# Second Version
-#cd x264;   git checkout b5a8ad7e0047ec65cb01d64b1151e358a7b84314; cd ..
-#cd libvpx; git checkout ba6f60dba70ad56fbfd1080bb4555f078bc774bf; cd ..
-#cd libav; git checkout b44c8ad280c221691560ae9625421416e20c483f; cd ..
-
-# Third Version
-#cd x264;   git checkout 0ba8a9c6973897ec35e1a5d241a71f4f5a4f81aa; cd ..
-#cd libvpx; git checkout v0.9.7; cd .. #e28e08146e468c55e435d19b2c95654e04fe3044
-#cd ffmpeg; git checkout n0.8.2; cd .. #d1bc77d86c5c8b013b371c1bf027f7583aef07b3
-#cd libav; git checkout b44c8ad280c221691560ae9625421416e20c483f; cd ..
-
-# Fourth Version
-#cd x264;   git checkout 07efeb45db224b7757880d4d63bb549fb454f6db; cd .. # Add fenc prefetchi...
-#cd libvpx; git checkout v0.9.7-p1; cd .. #20307c70ae96c45b9b00338989b952fb334e4fc9 # Update CHANGEL...
-#cd ffmpeg; git checkout n0.8.6; cd .. #1e1015fd223ff33a88585db13047ce766369c21b # Version numbe...
-
-# Fifth Version
-cd x264;   git checkout 0c7dab9c2a106ce3ee5d6ad7282afb49e1cc3954; cd .. # Fix regression in r2118...
-cd libvpx; git checkout v0.9.7-p1; cd .. #20307c70ae96c45b9b00338989b952fb334e4fc9 # Update CHANGEL...
-cd ffmpeg; git checkout n0.9.1; cd .. #601e64845881af79c0d40762d7f08664699c1e25 # Upadte for 0.9.1...
 
 sleep 5s
 
