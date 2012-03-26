@@ -1,7 +1,17 @@
 #!/bin/bash
 # Builds ffmpeg, libx264, libvpx from git repos
+
+# Choose which repo set to use
+#repoLocation=none # Already setup
+repoLocation=canonical # The authoritive sources
+#repoLocation=jp2-s1
+#repoLocation=YourServerName.com
+
+# Pause between sections
+PAUSE=True
+
 sudo echo "" # this will ask you for your password immediately, should cache it for the rest of the process
-ver=`lsb_release -c -s`
+sys_ver=`lsb_release -c -s`
 
 # Don't do this stuff for now (top unreachable block)
 if [ "A" = "B" ] ; then
@@ -14,7 +24,7 @@ sudo apt-get -y install git-core checkinstall yasm texi2html libfaac-dev libmp3l
 echo "other lib pre-reqs"
 sudo apt-get -y install frei0r-plugins-dev libdc1394-22 libdc1394-22-dev libgsm1 libgsm1-dev libopenjpeg-dev libschroedinger-1.0-0 libschroedinger-dev libschroedinger-doc libspeex-dev libvdpau-dev vflib3-dev
 echo "version specific pre-reqs"
-case $ver in
+case $sys_ver in
   lucid)
     echo none
   ;;
@@ -23,13 +33,17 @@ case $ver in
     # OpenCV
     sudo apt-get -y install libcv2.1 libcv-dev libcvaux2.1 libcvaux-dev libhighgui2.1 libhighgui-dev opencv-doc python-opencv
   ;;
+  precise)
+    sudo apt-get -y install librtmp-dev libva-dev libjack-jackd2-dev libass4 libass-dev  libmodplug1 libmodplug-dev libvo-aacenc0 libvo-aacenc-dev libvo-amrwbenc0 libvo-amrwbenc-dev libopenal1 libopenal-dev
+    sudo apt-get -y install libcv2.3
 esac
 
-repoLocation=none # Already setup
-#repoLocation=canonical # The authoritive sources
-#repoLocation=jp2-s1
+if [ "$PAUSE" = "True" ] ; then
+  read -p "Press any key to continue... " -n1 -s
+fi
 
-# Choose which repo set to use
+
+
 case $repoLocation in
 
   canonical)
@@ -71,27 +85,33 @@ cd ffmpeg; make distclean; git checkout master; git pull; cd ..
 
 echo "Go to the correct GIT Versions"
 # Sixth Version - Feb 9, 2012
-cd x264;   git checkout da19765d723b06a1fa189478e9da61a1c18490f8; cd .. # TBM, AVX2, FMA3, BMI1, and...
+cd x264;   git checkout 5c85e0a2b7992fcaab09418e3fcefc613cffc743; cd .. # Fix clobbering of...
 cd libvpx; git checkout v1.0.0; cd .. #2b0aee4b5def280d4e27c11d1b95ecd8545eed34 # Update CHANGEL...
-cd ffmpeg; git checkout n0.10; cd .. #7e16636995fd6710164f7622cd77abc94c27a064 # doc: remove doc/f...
+cd ffmpeg; git checkout n0.10.2; cd .. #f139838d6473c7b5152178f602cb953a824c2ff9 # Update for 0.10.2
 
 
 sleep 5s
+if [ "$PAUSE" = "True" ] ; then
+  read -p "Press any key to continue... " -n1 -s
+fi
 
 ##################################################
 echo "Build + Install x264"
 cd x264
 ./configure --enable-static
 make
-case $ver in
+case $sys_ver in
   lucid)
-sudo checkinstall --pkgname=x264 --pkgversion="3:$(./version.sh | awk -F'[" ]' '/POINT/{print $4"+git"$5}')" --backup=no --deldoc=yes --default 
+sudo checkinstall --pkgname=x264 --pkgversion="3:$(./version.sh | awk -F'[" ]' '/POINT/{print $4"+git"$5}')" --backup=no --deldoc=yes --default #" - fix highlighting
   ;;
-  maverick | natty | oneiric)
-sudo checkinstall --pkgname=x264 --pkgversion="3:$(./version.sh | awk -F'[" ]' '/POINT/{print $4"+git"$5}')" --backup=no --deldoc=yes --default --fstrans=no
+  maverick | natty | oneiric | precise)
+sudo checkinstall --pkgname=x264 --pkgversion="3:$(./version.sh | awk -F'[" ]' '/POINT/{print $4"+git"$5}')" --backup=no --deldoc=yes --default --fstrans=no #" - fix highlighting
   ;;
 esac
 sleep 2s
+if [ "$PAUSE" = "True" ] ; then
+  read -p "Press any key to continue... " -n1 -s
+fi
 cd ..
 
 ##################################################
@@ -99,15 +119,18 @@ echo "Build + Install libvpx"
 cd libvpx
 ./configure
 make
-case $ver in
+case $sys_ver in
   lucid)
 sudo checkinstall --pkgname=libvpx --pkgversion="$(date +%Y%m%d%H%M)-git" --backup=no --default --deldoc=yes
   ;;
-  maverick | natty | oneiric)
+  maverick | natty | oneiric | precise)
 sudo checkinstall --pkgname=libvpx --pkgversion="$(date +%Y%m%d%H%M)-git" --backup=no --default --deldoc=yes --fstrans=no
   ;;
 esac
 sleep 2s
+if [ "$PAUSE" = "True" ] ; then
+  read -p "Press any key to continue... " -n1 -s
+fi
 cd ..
 
 ##################################################
@@ -115,53 +138,73 @@ echo "Build + Install ffmpeg"
 cd ffmpeg
 #cd libav
 
-#ffmpeg config options, missing --enable-libopencv
-config_options="--enable-gpl --enable-version3 --enable-nonfree --enable-postproc --enable-x11grab --enable-vdpau --enable-bzlib --enable-pthreads --enable-zlib --enable-runtime-cpudetect --enable-frei0r --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libdc1394 --enable-libfaac --enable-libfreetype --enable-libgsm --enable-libmp3lame --enable-libopenjpeg --enable-libschroedinger --enable-libspeex --enable-libtheora --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libxvid"
-case $ver in
+#ffmpeg config options
+config_options=$config_options" --enable-gpl --enable-version3 --enable-nonfree --enable-x11grab --enable-vdpau --enable-runtime-cpudetect"
+config_options=$config_options" --enable-bzlib --enable-frei0r --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libdc1394 --enable-libfaac --enable-libfreetype --enable-libgsm --enable-libmp3lame --enable-libopenjpeg --enable-libschroedinger --enable-libspeex --enable-libtheora --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libxvid --enable-zlib"
+case $sys_ver in
   lucid)
 echo nothing
   ;;
   maverick | natty)
-config_options=$config_options" --enable-vaapi --enable-librtmp" #Temp disable opencv --enable-libopencv"
+    config_options=$config_options" --enable-vaapi --enable-librtmp" #Temp disable opencv --enable-libopencv"
   ;;
   oneiric)
-config_options=$config_options" --enable-vaapi --enable-librtmp --enable-libopencv"
+    config_options=$config_options" --enable-vaapi --enable-librtmp --enable-libopencv"
+  ;;
+  precise)
+    config_options=$config_options" --enable-vaapi --enable-vda"  
+    config_options=$config_options" --enable-gnutls --enable-libass --enable-libmodplug --enable-libpulse --enable-librtmp --enable-libvo-aacenc --enable-libvo-amrwbenc --enable-openal" #--enable-libopencv
   ;;
 esac
 # Stuff to add? --enable-libvo-aacenc --enable-libvo-amrwbenc ...in natty???
 # Don't add 
 # --enable-avisynth - Windows only, requires vfw32
+# --enable-libaacplus - not available on ubuntu?
+# --enable-libcdio - something isn't right about the ubutu version "libavdevice/libcdio.c:26:23: fatal error: cdio/cdda.h: No such file or directory"
+# --enable-libcelt - too old of a version...might be worth fixing up?
 # --enable-libnut - needs to be built from source on ubuntu, there is a good nut muxer built in, I believe; 
+# --enable-libxavs - ??
+# --enable-openssl - What is this for?
 
+echo ./configure $config_options
 ./configure $config_options
+if [ "$PAUSE" = "True" ] ; then
+  read -p "Press any key to continue... " -n1 -s
+fi
 make
-case $ver in
+case $sys_ver in
   lucid)
-sudo checkinstall --pkgname=ffmpeg --pkgversion="5:$(./version.sh)" --backup=no --deldoc=yes --default
+sudo checkinstall --pkgname=ffmpeg --pkgversion="5:$(./version.sh)" --backup=no --deldoc=yes --default #" - fix highlighting
   ;;
-  maverick | natty | oneiric)
-sudo checkinstall --pkgname=ffmpeg --pkgversion="5:$(./version.sh)" --backup=no --deldoc=yes --fstrans=no --default
+  maverick | natty | oneiric | precise)
+sudo checkinstall --pkgname=ffmpeg --pkgversion="5:$(./version.sh)" --backup=no --deldoc=yes --fstrans=no --default #" - fix highlighting
   ;;
 esac
 hash x264 ffmpeg ffplay ffprobe
 sleep 2s
+if [ "$PAUSE" = "True" ] ; then
+  read -p "Press any key to continue... " -n1 -s
+fi
 
 echo "qt-faststart seperate package"
 make tools/qt-faststart
-case $ver in
+case $sys_ver in
   lucid)
-sudo checkinstall --pkgname=qt-faststart --pkgversion="$(./version.sh)" --backup=no --deldoc=yes --default install -D -m755 tools/qt-faststart /usr/local/bin/qt-faststart  
+sudo checkinstall --pkgname=qt-faststart --pkgversion="$(./version.sh)" --backup=no --deldoc=yes --default install -D -m755 tools/qt-faststart /usr/local/bin/qt-faststart  #" - fix highlighting
   ;;
-  maverick | natty | oneiric)
-sudo checkinstall --pkgname=qt-faststart --pkgversion="$(./version.sh)" --backup=no --deldoc=yes --fstrans=no --default install -D -m755 tools/qt-faststart /usr/local/bin/qt-faststart
+  maverick | natty | oneiric | precise)
+sudo checkinstall --pkgname=qt-faststart --pkgversion="$(./version.sh)" --backup=no --deldoc=yes --fstrans=no --default install -D -m755 tools/qt-faststart /usr/local/bin/qt-faststart #" - fix highlighting
   ;;
 esac
 sleep 2s
+if [ "$PAUSE" = "True" ] ; then
+  read -p "Press any key to continue... " -n1 -s
+fi
 cd ..
 
 ##################################################
 echo "Re-Install ffmpeg, x264, or libvpx dependant stuff"
-echo sudo apt-get install dvdrip k9copy kdenlive
+echo sudo apt-get install k9copy kdenlive recorditnow
 
 # Don't do this stuff for now (bottom unreachable block)
 if [ "A" = "B" ] ; then
