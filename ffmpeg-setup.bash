@@ -8,7 +8,8 @@ repoLocation=canonical # The authoritive sources
 #repoLocation=YourServerName.com
 
 # Pause between sections
-PAUSE=True
+PAUSE=False
+#PAUSE=True
 
 sudo echo "" # this will ask you for your password immediately, should cache it for the rest of the process
 sys_ver=`lsb_release -c -s`
@@ -85,9 +86,9 @@ cd ffmpeg; make distclean; git checkout master; git pull; cd ..
 
 echo "Go to the correct GIT Versions"
 # Sixth Version - Feb 9, 2012
-cd x264;   git checkout 5c85e0a2b7992fcaab09418e3fcefc613cffc743; cd .. # Fix clobbering of...
-cd libvpx; git checkout v1.0.0; cd .. #2b0aee4b5def280d4e27c11d1b95ecd8545eed34 # Update CHANGEL...
-cd ffmpeg; git checkout n0.10.2; cd .. #f139838d6473c7b5152178f602cb953a824c2ff9 # Update for 0.10.2
+cd x264;   git checkout 999b753ff0f4dc872077f4fa90d465e948cbe656; cd .. # Threaded lookahead
+cd libvpx; git checkout v1.1.0; cd .. #297dc90255cf9511bea26c1056aa5e118dae9028 # Update CHANGELOG for v1.1.0 (Eider) release
+cd ffmpeg; git checkout n0.10.3; cd .. #b1f9ff45d4d4a2eb705fec33028b2b886d4b6ffb # update for ffmpeg 0.10.3
 
 
 sleep 5s
