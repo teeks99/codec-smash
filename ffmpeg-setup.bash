@@ -86,10 +86,9 @@ cd ffmpeg; make distclean; git checkout master; git pull; cd ..
 
 echo "Go to the correct GIT Versions"
 # Sixth Version - Feb 9, 2012
-cd x264;   git checkout 999b753ff0f4dc872077f4fa90d465e948cbe656; cd .. # Threaded lookahead
+cd x264;   git checkout 198a7ea13ccb727d4ea24b29f5da9b0292387309; cd .. # Enhance mb_info
 cd libvpx; git checkout v1.1.0; cd .. #297dc90255cf9511bea26c1056aa5e118dae9028 # Update CHANGELOG for v1.1.0 (Eider) release
-cd ffmpeg; git checkout n0.10.3; cd .. #b1f9ff45d4d4a2eb705fec33028b2b886d4b6ffb # update for ffmpeg 0.10.3
-
+cd ffmpeg; git checkout n1.0; cd .. #a74f292d4ab3e800853c3ab7536418e6eb584b27 # tests/Makefile: fix
 
 sleep 5s
 if [ "$PAUSE" = "True" ] ; then
