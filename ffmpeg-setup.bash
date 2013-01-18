@@ -53,7 +53,8 @@ git clone git://git.videolan.org/x264.git
 #git clone git://review.webmproject.org/libvpx.git
 git clone http://git.chromium.org/webm/libvpx.git
 #git clone git://git.ffmpeg.org/ffmpeg.git
-git clone git://git.videolan.org/ffmpeg.git
+#git clone git://git.videolan.org/ffmpeg.git
+git clone git://source.ffmpeg.org/ffmpeg.git
 #git clone git://git.libav.org/libav.git
   ;;
 
@@ -85,10 +86,10 @@ cd ffmpeg; make distclean; git checkout master; git pull; cd ..
 #cd libav; make distclean; git checkout master; git pull; cd ..
 
 echo "Go to the correct GIT Versions"
-# Sixth Version - Feb 9, 2012
-cd x264;   git checkout 198a7ea13ccb727d4ea24b29f5da9b0292387309; cd .. # Enhance mb_info
-cd libvpx; git checkout v1.1.0; cd .. #297dc90255cf9511bea26c1056aa5e118dae9028 # Update CHANGELOG for v1.1.0 (Eider) release
-cd ffmpeg; git checkout n1.0; cd .. #a74f292d4ab3e800853c3ab7536418e6eb584b27 # tests/Makefile: fix
+# 7th Version - Jan 18, 2013
+cd x264;   git checkout bc13772e21d0e61dea6ba81d0d387604b5b360df; cd .. # Bump dates to 2013
+cd libvpx; git checkout v1.2.0; cd .. # b9ce43029298182668d4dcb0e0814189e4a63c2a # Update CHANGELOG for v1.2.0 (Eider) release
+cd ffmpeg; git checkout n1.1; cd .. # 79013a59c0605472fe941ca9ff01324c1320f874 # update for 1.1
 
 sleep 5s
 if [ "$PAUSE" = "True" ] ; then
