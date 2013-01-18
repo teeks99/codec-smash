@@ -37,6 +37,11 @@ case $sys_ver in
   precise)
     sudo apt-get -y install librtmp-dev libva-dev libjack-jackd2-dev libass4 libass-dev  libmodplug1 libmodplug-dev libvo-aacenc0 libvo-aacenc-dev libvo-amrwbenc0 libvo-amrwbenc-dev libopenal1 libopenal-dev
     sudo apt-get -y install libcv2.3
+  ;;
+  quantal)
+    sudo apt-get -y install librtmp-dev libva-dev libjack-jackd2-dev libass4 libass-dev  libmodplug1 libmodplug-dev libvo-aacenc0 libvo-aacenc-dev libvo-amrwbenc0 libvo-amrwbenc-dev libopenal1 libopenal-dev
+    sudo apt-get -y install libcv2.3
+    sudo apt-get -y install libbluray-dev libbluray1 libv4l-0 libv4l-dev flite1-dev libvlite1 libopus-dev libopus0 libtwolame-dev libtwolame0 
 esac
 
 if [ "$PAUSE" = "True" ] ; then
@@ -87,7 +92,7 @@ cd ffmpeg; make distclean; git checkout master; git pull; cd ..
 
 echo "Go to the correct GIT Versions"
 # 7th Version - Jan 18, 2013
-cd x264;   git checkout bc13772e21d0e61dea6ba81d0d387604b5b360df; cd .. # Bump dates to 2013
+cd x264;   git checkout 198a7ea13ccb727d4ea24b29f5da9b0292387309; cd .. # Enhance mb_info
 cd libvpx; git checkout v1.2.0; cd .. # b9ce43029298182668d4dcb0e0814189e4a63c2a # Update CHANGELOG for v1.2.0 (Eider) release
 cd ffmpeg; git checkout n1.1; cd .. # 79013a59c0605472fe941ca9ff01324c1320f874 # update for 1.1
 
@@ -105,7 +110,7 @@ case $sys_ver in
   lucid)
 sudo checkinstall --pkgname=x264 --pkgversion="3:$(./version.sh | awk -F'[" ]' '/POINT/{print $4"+git"$5}')" --backup=no --deldoc=yes --default #" - fix highlighting
   ;;
-  maverick | natty | oneiric | precise)
+  maverick | natty | oneiric | precise | quantal)
 sudo checkinstall --pkgname=x264 --pkgversion="3:$(./version.sh | awk -F'[" ]' '/POINT/{print $4"+git"$5}')" --backup=no --deldoc=yes --default --fstrans=no #" - fix highlighting
   ;;
 esac
@@ -124,7 +129,7 @@ case $sys_ver in
   lucid)
 sudo checkinstall --pkgname=libvpx --pkgversion="$(date +%Y%m%d%H%M)-git" --backup=no --default --deldoc=yes
   ;;
-  maverick | natty | oneiric | precise)
+  maverick | natty | oneiric | precise | quantal)
 sudo checkinstall --pkgname=libvpx --pkgversion="$(date +%Y%m%d%H%M)-git" --backup=no --default --deldoc=yes --fstrans=no
   ;;
 esac
@@ -156,13 +161,16 @@ echo nothing
     config_options=$config_options" --enable-vaapi --enable-vda"  
     config_options=$config_options" --enable-gnutls --enable-libass --enable-libmodplug --enable-libpulse --enable-librtmp --enable-libvo-aacenc --enable-libvo-amrwbenc --enable-openal" #--enable-libopencv
   ;;
+  quantal)
+    config_options=$config_options" --enable-vaapi --enable-vda"  
+    config_options=$config_options" --enable-fontconfig --enable-gnutls --enable-libass --enable-libbluray --enable-libflite --enable-libmodplug --enable-libopus --enable-libpulse --enable-librtmp --enable-libtwolame --enable-libv4l2 --enable-libvo-aacenc --enable-libvo-amrwbenc --enable-openal" #--enable-libopencv
+  ;;
 esac
 # Stuff to add? --enable-libvo-aacenc --enable-libvo-amrwbenc ...in natty???
 # Don't add 
 # --enable-avisynth - Windows only, requires vfw32
 # --enable-libaacplus - not available on ubuntu?
 # --enable-libcdio - something isn't right about the ubutu version "libavdevice/libcdio.c:26:23: fatal error: cdio/cdda.h: No such file or directory"
-# --enable-libcelt - too old of a version...might be worth fixing up?
 # --enable-libnut - needs to be built from source on ubuntu, there is a good nut muxer built in, I believe; 
 # --enable-libxavs - ??
 # --enable-openssl - What is this for?
@@ -177,7 +185,7 @@ case $sys_ver in
   lucid)
 sudo checkinstall --pkgname=ffmpeg --pkgversion="5:$(./version.sh)" --backup=no --deldoc=yes --default #" - fix highlighting
   ;;
-  maverick | natty | oneiric | precise)
+  maverick | natty | oneiric | precise | quantal)
 sudo checkinstall --pkgname=ffmpeg --pkgversion="5:$(./version.sh)" --backup=no --deldoc=yes --fstrans=no --default #" - fix highlighting
   ;;
 esac
@@ -193,7 +201,7 @@ case $sys_ver in
   lucid)
 sudo checkinstall --pkgname=qt-faststart --pkgversion="$(./version.sh)" --backup=no --deldoc=yes --default install -D -m755 tools/qt-faststart /usr/local/bin/qt-faststart  #" - fix highlighting
   ;;
-  maverick | natty | oneiric | precise)
+  maverick | natty | oneiric | precise | quantal)
 sudo checkinstall --pkgname=qt-faststart --pkgversion="$(./version.sh)" --backup=no --deldoc=yes --fstrans=no --default install -D -m755 tools/qt-faststart /usr/local/bin/qt-faststart #" - fix highlighting
   ;;
 esac
@@ -205,7 +213,7 @@ cd ..
 
 ##################################################
 echo "Re-Install ffmpeg, x264, or libvpx dependant stuff"
-echo sudo apt-get install k9copy kdenlive recorditnow
+echo sudo apt-get install k9copy kdenlive recorditnow xvst
 
 # Don't do this stuff for now (bottom unreachable block)
 if [ "A" = "B" ] ; then
