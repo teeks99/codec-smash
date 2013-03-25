@@ -41,7 +41,7 @@ case $sys_ver in
   quantal)
     sudo apt-get -y install librtmp-dev libva-dev libjack-jackd2-dev libass4 libass-dev  libmodplug1 libmodplug-dev libvo-aacenc0 libvo-aacenc-dev libvo-amrwbenc0 libvo-amrwbenc-dev libopenal1 libopenal-dev
     sudo apt-get -y install libcv2.3
-    sudo apt-get -y install libbluray-dev libbluray1 libv4l-0 libv4l-dev flite1-dev libvlite1 libopus-dev libopus0 libtwolame-dev libtwolame0 
+    sudo apt-get -y install libbluray-dev libbluray1 libv4l-0 libv4l-dev flite1-dev libflite1 libopus-dev libopus0 libtwolame-dev libtwolame0 
 esac
 
 if [ "$PAUSE" = "True" ] ; then
