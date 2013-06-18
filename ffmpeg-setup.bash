@@ -92,9 +92,9 @@ cd ffmpeg; make distclean; git checkout master; git pull; cd ..
 
 echo "Go to the correct GIT Versions"
 # 7th Version - Jan 18, 2013
-cd x264;   git checkout 198a7ea13ccb727d4ea24b29f5da9b0292387309; cd .. # Enhance mb_info
+cd x264;   git checkout a3ac64b8b467eea1264c0053022893bc84b2e9a2; cd .. # OpenCL support
 cd libvpx; git checkout v1.2.0; cd .. # b9ce43029298182668d4dcb0e0814189e4a63c2a # Update CHANGELOG for v1.2.0 (Eider) release
-cd ffmpeg; git checkout n1.1; cd .. # 79013a59c0605472fe941ca9ff01324c1320f874 # update for 1.1
+cd ffmpeg; git checkout n1.2.1; cd .. # 79013a59c0605472fe941ca9ff01324c1320f874 # exr: silence warning
 
 sleep 5s
 if [ "$PAUSE" = "True" ] ; then
