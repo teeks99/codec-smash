@@ -93,8 +93,8 @@ cd ffmpeg; make distclean; git checkout master; git pull; cd ..
 echo "Go to the correct GIT Versions"
 #cd x264;   git checkout f0c1c53d58420d209f0fb7b63e49125ab1c85aa7; cd .. # Tweak i16x16-del...
 cd x264;   git checkout 198a7ea13ccb727d4ea24b29f5da9b0292387309; cd .. # Enhance mb_info
-cd libvpx; git checkout v1.3.0; cd .. # 2e88f2f2ec777259bda1714e72f1ecd2519bceb5 # Fix bug in extend_frame
-cd ffmpeg; git checkout n2.0.3; cd .. # b4552cc9b8c37410f754af5d34d24e7b8a9b4b0e # update for FFmpeg 2.0.3
+cd libvpx; git checkout v1.3.0; cd ..
+cd ffmpeg; git checkout n2.1.1; cd ..
 
 sleep 5s
 if [ "$PAUSE" = "True" ] ; then
