@@ -38,8 +38,8 @@ case $sys_ver in
     sudo apt-get -y install librtmp-dev libva-dev libjack-jackd2-dev libass4 libass-dev  libmodplug1 libmodplug-dev libvo-aacenc0 libvo-aacenc-dev libvo-amrwbenc0 libvo-amrwbenc-dev libopenal1 libopenal-dev
     sudo apt-get -y install libcv2.3
   ;;
-  quantal)
-    sudo apt-get -y install librtmp-dev libva-dev libjack-jackd2-dev libass4 libass-dev  libmodplug1 libmodplug-dev libvo-aacenc0 libvo-aacenc-dev libvo-amrwbenc0 libvo-amrwbenc-dev libopenal1 libopenal-dev
+  quantal | raring | saucy)
+    sudo apt-get -y install librtmp-dev libva-dev libjack-jackd2-dev libass4 libass-dev  libmodplug1 libmodplug-dev libvo-aacenc0 libvo-aacenc-dev libvo-amrwbenc0 libvo-amrwbenc-dev libopenal1 libopenal-dev yasm
     sudo apt-get -y install libcv2.3
     sudo apt-get -y install libbluray-dev libbluray1 libv4l-0 libv4l-dev flite1-dev libflite1 libopus-dev libopus0 libtwolame-dev libtwolame0 
 esac
@@ -91,10 +91,10 @@ cd ffmpeg; make distclean; git checkout master; git pull; cd ..
 #cd libav; make distclean; git checkout master; git pull; cd ..
 
 echo "Go to the correct GIT Versions"
-# 7th Version - Jan 18, 2013
-cd x264;   git checkout a3ac64b8b467eea1264c0053022893bc84b2e9a2; cd .. # OpenCL support
-cd libvpx; git checkout v1.2.0; cd .. # b9ce43029298182668d4dcb0e0814189e4a63c2a # Update CHANGELOG for v1.2.0 (Eider) release
-cd ffmpeg; git checkout n1.2.1; cd .. # 79013a59c0605472fe941ca9ff01324c1320f874 # exr: silence warning
+#cd x264;   git checkout f0c1c53d58420d209f0fb7b63e49125ab1c85aa7; cd .. # Tweak i16x16-del...
+cd x264;   git checkout 198a7ea13ccb727d4ea24b29f5da9b0292387309; cd .. # Enhance mb_info
+cd libvpx; git checkout v1.3.0; cd .. # 2e88f2f2ec777259bda1714e72f1ecd2519bceb5 # Fix bug in extend_frame
+cd ffmpeg; git checkout n2.0.3; cd .. # b4552cc9b8c37410f754af5d34d24e7b8a9b4b0e # update for FFmpeg 2.0.3
 
 sleep 5s
 if [ "$PAUSE" = "True" ] ; then
@@ -110,7 +110,7 @@ case $sys_ver in
   lucid)
 sudo checkinstall --pkgname=x264 --pkgversion="3:$(./version.sh | awk -F'[" ]' '/POINT/{print $4"+git"$5}')" --backup=no --deldoc=yes --default #" - fix highlighting
   ;;
-  maverick | natty | oneiric | precise | quantal)
+  maverick | natty | oneiric | precise | quantal | raring | saucy)
 sudo checkinstall --pkgname=x264 --pkgversion="3:$(./version.sh | awk -F'[" ]' '/POINT/{print $4"+git"$5}')" --backup=no --deldoc=yes --default --fstrans=no #" - fix highlighting
   ;;
 esac
@@ -129,7 +129,7 @@ case $sys_ver in
   lucid)
 sudo checkinstall --pkgname=libvpx --pkgversion="$(date +%Y%m%d%H%M)-git" --backup=no --default --deldoc=yes
   ;;
-  maverick | natty | oneiric | precise | quantal)
+  maverick | natty | oneiric | precise | quantal | raring | saucy)
 sudo checkinstall --pkgname=libvpx --pkgversion="$(date +%Y%m%d%H%M)-git" --backup=no --default --deldoc=yes --fstrans=no
   ;;
 esac
@@ -161,7 +161,7 @@ echo nothing
     config_options=$config_options" --enable-vaapi --enable-vda"  
     config_options=$config_options" --enable-gnutls --enable-libass --enable-libmodplug --enable-libpulse --enable-librtmp --enable-libvo-aacenc --enable-libvo-amrwbenc --enable-openal" #--enable-libopencv
   ;;
-  quantal)
+  quantal | raring | saucy)
     config_options=$config_options" --enable-vaapi --enable-vda"  
     config_options=$config_options" --enable-fontconfig --enable-gnutls --enable-libass --enable-libbluray --enable-libflite --enable-libmodplug --enable-libopus --enable-libpulse --enable-librtmp --enable-libtwolame --enable-libv4l2 --enable-libvo-aacenc --enable-libvo-amrwbenc --enable-openal" #--enable-libopencv
   ;;
@@ -185,7 +185,7 @@ case $sys_ver in
   lucid)
 sudo checkinstall --pkgname=ffmpeg --pkgversion="5:$(./version.sh)" --backup=no --deldoc=yes --default #" - fix highlighting
   ;;
-  maverick | natty | oneiric | precise | quantal)
+  maverick | natty | oneiric | precise | quantal | raring | saucy)
 sudo checkinstall --pkgname=ffmpeg --pkgversion="5:$(./version.sh)" --backup=no --deldoc=yes --fstrans=no --default #" - fix highlighting
   ;;
 esac
@@ -201,7 +201,7 @@ case $sys_ver in
   lucid)
 sudo checkinstall --pkgname=qt-faststart --pkgversion="$(./version.sh)" --backup=no --deldoc=yes --default install -D -m755 tools/qt-faststart /usr/local/bin/qt-faststart  #" - fix highlighting
   ;;
-  maverick | natty | oneiric | precise | quantal)
+  maverick | natty | oneiric | precise | quantal | raring | saucy)
 sudo checkinstall --pkgname=qt-faststart --pkgversion="$(./version.sh)" --backup=no --deldoc=yes --fstrans=no --default install -D -m755 tools/qt-faststart /usr/local/bin/qt-faststart #" - fix highlighting
   ;;
 esac
