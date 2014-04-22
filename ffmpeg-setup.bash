@@ -163,6 +163,7 @@ echo nothing
   quantal | raring | saucy)
     config_options=$config_options" --enable-vaapi --enable-vda"  
     config_options=$config_options" --enable-fontconfig --enable-gnutls --enable-libass --enable-libbluray --enable-libflite --enable-libmodplug --enable-libopus --enable-libpulse --enable-librtmp --enable-libtwolame --enable-libv4l2 --enable-libvo-aacenc --enable-libvo-amrwbenc --enable-openal" #--enable-libopencv
+    config_options=$config_options" --extra-libs=-ldl"
   ;;
 esac
 # Stuff to add? --enable-libvo-aacenc --enable-libvo-amrwbenc ...in natty???
