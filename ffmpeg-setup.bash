@@ -29,6 +29,7 @@ sudo apt-get -y install librtmp-dev libva-dev libjack-jackd2-dev libass4 libass-
 sudo apt-get -y install libcv2.3
 sudo apt-get -y install libbluray-dev libbluray1 libv4l-0 libv4l-dev flite1-dev libflite1 libopus-dev libopus0 libtwolame-dev libtwolame0 
 sudo apt-get -y install libx264-dev libfdk-aac-dev
+sudo apt-get -y install libvpx-dev
 
 if [ "$PAUSE" = "True" ] ; then
   read -p "Press any key to continue... " -n1 -s
@@ -80,40 +81,40 @@ if [ "$PAUSE" = "True" ] ; then
 fi
 
 ##################################################
-echo "Build + Install x264"
-cd x264
-./configure --enable-static
-make
-sudo checkinstall --pkgname=x264 --pkgversion="3:$(./version.sh | awk -F'[" ]' '/POINT/{print $4"+git"$5}')" --backup=no --deldoc=yes --default --fstrans=no #" - fix highlighting
-sleep 2s
-if [ "$PAUSE" = "True" ] ; then
-  read -p "Press any key to continue... " -n1 -s
-fi
-cd ..
+#echo "Build + Install x264"
+#cd x264
+#./configure --enable-static
+#make
+#sudo checkinstall --pkgname=x264 --pkgversion="3:$(./version.sh | awk -F'[" ]' '/POINT/{print $4"+git"$5}')" --backup=no --deldoc=yes --default --fstrans=no #" - fix highlighting
+#sleep 2s
+#if [ "$PAUSE" = "True" ] ; then
+#  read -p "Press any key to continue... " -n1 -s
+#fi
+#cd ..
 
 ###################################################
-echo "Build + Install x265"
-pushd x265/build/linux
-./make-Makefiles.bash
-make
-sudo checkinstall --pkgname=x265 --pkgversion="1" --backup=no --deldoc=yes --default --fstrans=no #" - fix highlighting
-sleep 2s
-if [ "$PAUSE" = "True" ] ; then
-  read -p "Press any key to continue... " -n1 -s
-fi
-popd
+#echo "Build + Install x265"
+#pushd x265/build/linux
+#./make-Makefiles.bash
+#make
+#sudo checkinstall --pkgname=x265 --pkgversion="1" --backup=no --deldoc=yes --default --fstrans=no #" - fix highlighting
+#sleep 2s
+#if [ "$PAUSE" = "True" ] ; then
+#  read -p "Press any key to continue... " -n1 -s
+#fi
+#popd
 
 ##################################################
-echo "Build + Install libvpx"
-cd libvpx
-./configure
-make
-sudo checkinstall --pkgname=libvpx --pkgversion="$(date +%Y%m%d%H%M)-git" --backup=no --default --deldoc=yes --fstrans=no
-sleep 2s
-if [ "$PAUSE" = "True" ] ; then
-  read -p "Press any key to continue... " -n1 -s
-fi
-cd ..
+#echo "Build + Install libvpx"
+#cd libvpx
+#./configure
+#make
+#sudo checkinstall --pkgname=libvpx --pkgversion="$(date +%Y%m%d%H%M)-git" --backup=no --default --deldoc=yes --fstrans=no
+#sleep 2s
+#if [ "$PAUSE" = "True" ] ; then
+#  read -p "Press any key to continue... " -n1 -s
+#fi
+#cd ..
 
 ##################################################
 echo "Build + Install ffmpeg"
