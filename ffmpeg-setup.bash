@@ -8,8 +8,8 @@ repoLocation=canonical # The authoritive sources
 #repoLocation=YourServerName.com
 
 # Pause between sections
-PAUSE=False
-#PAUSE=True
+#PAUSE=False
+PAUSE=True
 
 sudo echo "" # this will ask you for your password immediately, should cache it for the rest of the process
 sys_ver=`lsb_release -c -s`
@@ -21,7 +21,7 @@ fi # End of top unrachable block
 
 # ----- First Time Setup -----
 echo "build pre-reqs"
-sudo apt-get -y install git-core checkinstall yasm texi2html libfaac-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libsdl1.2-dev libtheora-dev libvorbis-dev libx11-dev libxfixes-dev libxvidcore-dev zlib1g-dev
+sudo apt-get -y install git-core checkinstall yasm texi2html libfaac-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libsdl1.2-dev libtheora-dev libvorbis-dev libx11-dev libxfixes-dev libxvidcore-dev zlib1g-dev mecurial cmake
 echo "other lib pre-reqs"
 sudo apt-get -y install frei0r-plugins-dev libdc1394-22 libdc1394-22-dev libgsm1 libgsm1-dev libopenjpeg-dev libschroedinger-1.0-0 libschroedinger-dev libschroedinger-doc libspeex-dev libvdpau-dev vflib3-dev
 echo "version specific pre-reqs"
@@ -69,10 +69,10 @@ cd ffmpeg; make distclean; git checkout master; git pull; cd ..
 #cd libav; make distclean; git checkout master; git pull; cd ..
 
 echo "Go to the correct GIT Versions"
-cd x264;   git checkout dd79a61e0e354a432907f2d1f7137b27a12dfce7; cd .. # Update to current lavf api
-cd x265;   hg checkout 1.3; cd ..
+cd x264;   git checkout 40bb56814e56ed342040bdbf30258aab39ee9e89; cd .. # x86 Update to 
+cd x265;   hg checkout 1.4; cd ..
 cd libvpx; git checkout v1.3.0; cd ..
-cd ffmpeg; git checkout n2.2.1; cd ..
+cd ffmpeg; git checkout n2.5.2; cd ..
 
 sleep 5s
 if [ "$PAUSE" = "True" ] ; then
@@ -93,7 +93,7 @@ cd ..
 
 ###################################################
 echo "Build + Install x265"
-cd x265
+pushd x265/build/linux
 ./make-Makefiles.bash
 make
 sudo checkinstall --pkgname=x265 --pkgversion="1" --backup=no --deldoc=yes --default --fstrans=no #" - fix highlighting
@@ -101,7 +101,7 @@ sleep 2s
 if [ "$PAUSE" = "True" ] ; then
   read -p "Press any key to continue... " -n1 -s
 fi
-cd ..
+popd
 
 ##################################################
 echo "Build + Install libvpx"
@@ -122,7 +122,12 @@ cd ffmpeg
 
 #ffmpeg config options
 config_options=$config_options" --enable-gpl --enable-version3 --enable-nonfree --enable-x11grab --enable-vdpau --enable-runtime-cpudetect"
-config_options=$config_options" --enable-bzlib --enable-frei0r --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libdc1394 --enable-libfaac --enable-libfreetype --enable-libgsm --enable-libmp3lame --enable-libopenjpeg --enable-libschroedinger --enable-libspeex --enable-libtheora --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libxvid --enable-zlib"
+config_options=$config_options" --enable-bzlib --enable-frei0r --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libdc1394 --enable-libfreetype --enable-libgsm --enable-libopenjpeg --enable-libschroedinger --enable-zlib"
+config_options=$config_options" --enable-libx264 --enable-libx265 --enable-libxvid"
+config_options=$config_options" --enable-libfaac --enable-libmp3lame"
+config_options=$config_options" --enable-libvpx"
+config_options=$config_options" --enable-libtheora --enable-libvorbis --enable-libspeex"
+config_options=$config_options" --enable-libopus"
 config_options=$config_options" --enable-vaapi --enable-vda"  
 config_options=$config_options" --enable-fontconfig --enable-gnutls --enable-libass --enable-libbluray --enable-libflite --enable-libmodplug --enable-libopus --enable-libpulse --enable-librtmp --enable-libtwolame --enable-libv4l2 --enable-libvo-aacenc --enable-libvo-amrwbenc --enable-openal" #--enable-libopencv
 config_options=$config_options" --extra-libs=-ldl"
