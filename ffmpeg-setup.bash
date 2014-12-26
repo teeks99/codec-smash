@@ -105,16 +105,16 @@ fi
 #popd
 
 ##################################################
-#echo "Build + Install libvpx"
-#cd libvpx
-#./configure
-#make
-#sudo checkinstall --pkgname=libvpx --pkgversion="$(date +%Y%m%d%H%M)-git" --backup=no --default --deldoc=yes --fstrans=no
-#sleep 2s
-#if [ "$PAUSE" = "True" ] ; then
-#  read -p "Press any key to continue... " -n1 -s
-#fi
-#cd ..
+echo "Build + Install libvpx"
+cd libvpx
+./configure
+make
+sudo checkinstall --pkgname=libvpx --pkgversion="$(date +%Y%m%d%H%M)-git" --backup=no --default --deldoc=yes --fstrans=no
+sleep 2s
+if [ "$PAUSE" = "True" ] ; then
+  read -p "Press any key to continue... " -n1 -s
+fi
+cd ..
 
 ##################################################
 echo "Build + Install ffmpeg"
