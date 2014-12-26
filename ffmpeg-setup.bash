@@ -73,7 +73,8 @@ echo "Go to the correct GIT Versions"
 cd x264;   git checkout 40bb56814e56ed342040bdbf30258aab39ee9e89; cd .. # x86 Update to 
 cd x265;   hg checkout 1.4; cd ..
 cd libvpx; git checkout v1.3.0; cd ..
-cd ffmpeg; git checkout n2.5.2; cd ..
+ffmpeg_version=2.5.2
+cd ffmpeg; git checkout n$ffmpeg_version; cd ..
 
 sleep 5s
 if [ "$PAUSE" = "True" ] ; then
@@ -147,7 +148,7 @@ if [ "$PAUSE" = "True" ] ; then
   read -p "Press any key to continue... " -n1 -s
 fi
 make
-sudo checkinstall --pkgname=ffmpeg --pkgversion="5:$(./version.sh)" --backup=no --deldoc=yes --fstrans=no --default #" - fix highlighting
+sudo checkinstall --pkgname=ffmpeg --pkgversion="5:$ffmpeg_version" --backup=no --deldoc=yes --fstrans=no --default #" - fix highlighting
 hash x264 ffmpeg ffplay ffprobe
 sleep 2s
 if [ "$PAUSE" = "True" ] ; then
@@ -156,7 +157,7 @@ fi
 
 echo "qt-faststart seperate package"
 make tools/qt-faststart
-sudo checkinstall --pkgname=qt-faststart --pkgversion="$(./version.sh)" --backup=no --deldoc=yes --fstrans=no --default install -D -m755 tools/qt-faststart /usr/local/bin/qt-faststart #" - fix highlighting
+sudo checkinstall --pkgname=qt-faststart --pkgversion="$ffmpeg_version" --backup=no --deldoc=yes --fstrans=no --default install -D -m755 tools/qt-faststart /usr/local/bin/qt-faststart #" - fix highlighting
 sleep 2s
 if [ "$PAUSE" = "True" ] ; then
   read -p "Press any key to continue... " -n1 -s
