@@ -123,7 +123,7 @@ cd ffmpeg
 #ffmpeg config options
 config_options=$config_options" --enable-gpl --enable-version3 --enable-nonfree --enable-x11grab --enable-vdpau --enable-runtime-cpudetect"
 config_options=$config_options" --enable-bzlib --enable-frei0r --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libdc1394 --enable-libfreetype --enable-libgsm --enable-libopenjpeg --enable-libschroedinger --enable-zlib"
-config_options=$config_options" --enable-libx264 --enable-libx265 --enable-libxvid"
+config_options=$config_options" --enable-libxvid --enable-libx264" # --enable-libx265" 
 config_options=$config_options" --enable-libfaac --enable-libmp3lame"
 config_options=$config_options" --enable-libvpx"
 config_options=$config_options" --enable-libtheora --enable-libvorbis --enable-libspeex"
