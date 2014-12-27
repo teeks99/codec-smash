@@ -31,6 +31,10 @@ sudo apt-get -y install libbluray-dev libbluray1 libv4l-0 libv4l-dev flite1-dev 
 sudo apt-get -y install libx264-dev libfdk-aac-dev
 sudo apt-get -y install libvpx-dev
 
+pkg_build="git-core mercurial checkinstall yasm build-essential cmake texi2html"
+pkg_prereq="libsdl1.2-dev libx11-dev libxfixes-dev zlib1g-dev frei0r-plugins-dev libdc1394-22-dev libgsm1-dev libvdpau-dev vflib3-dev"
+pkg_lib_prereq="libfaac-dev libmp3lame-dev libtheora-dev libvorbis-dev libxvidcore-dev libopenjpeg-dev libschroedinger-dev libspeex-dev libopus-dev libtwolame-dev libx264-dev libfdk-aac-dev" # libvpx-dev" # libx265-dev"
+
 if [ "$PAUSE" = "True" ] ; then
   read -p "Press any key to continue... " -n1 -s
 fi
