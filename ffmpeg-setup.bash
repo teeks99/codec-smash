@@ -20,20 +20,109 @@ if [ "A" = "B" ] ; then
 fi # End of top unrachable block
 
 # ----- First Time Setup -----
-echo "build pre-reqs"
-sudo apt-get -y install git-core checkinstall yasm texi2html libfaac-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libsdl1.2-dev libtheora-dev libvorbis-dev libx11-dev libxfixes-dev libxvidcore-dev zlib1g-dev mercurial cmake
-echo "other lib pre-reqs"
-sudo apt-get -y install frei0r-plugins-dev libdc1394-22 libdc1394-22-dev libgsm1 libgsm1-dev libopenjpeg-dev libschroedinger-1.0-0 libschroedinger-dev libschroedinger-doc libspeex-dev libvdpau-dev vflib3-dev
-echo "version specific pre-reqs"
-sudo apt-get -y install librtmp-dev libva-dev libjack-jackd2-dev libass4 libass-dev  libmodplug1 libmodplug-dev libvo-aacenc0 libvo-aacenc-dev libvo-amrwbenc0 libvo-amrwbenc-dev libopenal1 libopenal-dev yasm
-sudo apt-get -y install libcv2.3
-sudo apt-get -y install libbluray-dev libbluray1 libv4l-0 libv4l-dev flite1-dev libflite1 libopus-dev libopus0 libtwolame-dev libtwolame0 
-sudo apt-get -y install libx264-dev libfdk-aac-dev
-sudo apt-get -y install libvpx-dev
-
+# Build Stuff
 pkg_build="git-core mercurial checkinstall yasm build-essential cmake texi2html"
-pkg_prereq="libsdl1.2-dev libx11-dev libxfixes-dev zlib1g-dev frei0r-plugins-dev libdc1394-22-dev libgsm1-dev libvdpau-dev vflib3-dev"
-pkg_lib_prereq="libfaac-dev libmp3lame-dev libtheora-dev libvorbis-dev libxvidcore-dev libopenjpeg-dev libschroedinger-dev libspeex-dev libopus-dev libtwolame-dev libx264-dev libfdk-aac-dev" # libvpx-dev" # libx265-dev"
+
+# IO and Misc
+pkg_io=
+pkg_io=$pkg_io" libvdpau-dev" # HW Accel
+pkg_io=$pkg_io" libva-dev" # HW Accel
+pkg_io=$pkg_io" libx11-dev libxfixes-dev" # Grab X11
+pkg_io=$pkg_io" libsdl1.2-dev" # Grab video framebuffer
+pkg_io=$pkg_io" libdc1394-22-dev" # Firewire grabbing
+pkg_io=$pkg_io" libopenal-dev" # Audio IO
+pkg_io=$pkg_io" libjack-jackd2-dev" # Connections to/from JACK sound server
+pkg_io=$pkg_io" libv4l-dev" # Video 4 Linux Grabber(?)
+pkg_io=$pkg_io" libbluray-dev" # Read a bluray unencrypted disk
+pkg_io=$pkg_io" vflib3-dev" # font rasterizer
+pkg_io=$pkg_io" flite1-dev" # Speech Synthesis
+pkg_io=$pkg_io" zlib1g-dev" # deflate compression
+pkg_io=$pkg_io" frei0r-plugins-dev" # Filtering
+pkg_io=$pkg_io" libcv2.3" # Open CV Filters+
+pkg_io=$pkg_io" librtmp-dev" # Streams over RTMP
+# TODO: BZ2? OpenCL? VDA? LibPulse? FontConfig?
+pkg_enc=
+# Subtitles
+pkg_enc=$pkg_enc" libass-dev" # SubStation Alpha Subtitles
+# Audio
+pkg_enc=$pkg_enc" libmp3lame-dev" # MP3
+pkg_enc=$pkg_enc" libtwolame-dev" # MP2
+pkg_enc=$pkg_enc" libfdk-aac-dev" # AAC - best
+pkg_enc=$pkg_enc" libfaac-dev" # AAC - next best
+pkg_enc=$pkg_enc" libvo-aacenc-dev" # AAC - worst
+pkg_enc=$pkg_enc" libvorbis-dev" # Vorbis
+pkg_enc=$pkg_enc" libspeex-dev" # Speek
+pkg_enc=$pkg_enc" libopus-dev" # Opus
+pkg_enc=$pkg_enc" libopencore-amrnb-dev libopencore-amrwb-dev" # Adaptive Multi-Rate
+pkg_enc=$pkg_enc" libvo-amrwbenc-dev"  # Adaptive Multi-Rate
+pkg_enc=$pkg_enc" libgsm1-dev" # # GSM 06.10
+pkg_enc=$pkg_enc" libmodplug-dev" # MOD format
+# Video
+pkg_enc=$pkg_enc" libtheora-dev" # Theora
+pkg_enc=$pkg_enc" libopenjpeg-dev" # JPEG2000
+pkg_enc=$pkg_enc" libschroedinger-dev" # Schroedinger Dirac
+pkg_enc=$pkg_enc" libxvidcore-dev" # XVid
+pkg_enc=$pkg_enc" libx264-dev" # H.264
+#pkg_enc=$pkg_enc" libx265-dev" # H.265
+#pkg_enc=$pkg_enc" libvpx-dev" # VP8 & VP9
+
+#ffmpeg config options
+cfg_opts=$cfg_opts" --enable-gpl --enable-version3 --enable-nonfree"
+cfg_opts=$cfg_opts" --enable-runtime-cpudetect"
+cfg_opts=$cfg_opts" --enable-vdpau --enable-vaapi --enable-vda"
+cfg_opts=$cfg_opts" --enable-opencl"
+# Grab/Compress
+cfg_opts=$cfg_opts" --enable-x11grab --enable-libdc1394"
+cfg_opts=$cfg_opts" --enable-openal"
+cfg_opts=$cfg_opts" --enable-libpulse"
+cfg_opts=$cfg_opts" --enable-libv4l2"
+cfg_opts=$cfg_opts" --enable-libbluray"
+cfg_opts=$cfg_opts" --enable-libflite"
+cfg_opts=$cfg_opts" --enable-bzlib --enable-zlib"
+# Filters/etc
+cfg_opts=$cfg_opts" --enable-frei0r"
+cfg_opts=$cfg_opts" --enable-libfreetype"
+cfg_opts=$cfg_opts" --enable-fontconfig"
+#cfg_opts=$cfg_opts" --enable-libopencv"
+cfg_opts=$cfg_opts" --enable-librtmp"
+#cfg_opts=$cfg_opts" --enable-gnutls"
+#cfg_opts=$cfg_opts" --enable-openssl"
+# Subtitles
+cfg_opts=$cfg_opts" --enable-libass"
+# Audio
+cfg_opts=$cfg_opts" --enable-libmp3lame"
+cfg_opts=$cfg_opts" --enable-libtwolame"
+cfg_opts=$cfg_opts" --enable-libfdk-aac"
+cfg_opts=$cfg_opts" --enable-libfaac"
+cfg_opts=$cfg_opts" --enable-libvo-aacenc"
+cfg_opts=$cfg_opts" --enable-libvorbis"
+cfg_opts=$cfg_opts" --enable-libspeex"
+cfg_opts=$cfg_opts" --enable-libopus"
+cfg_opts=$cfg_opts" --enable-libopencore-amrnb --enable-libopencore-amrwb"
+cfg_opts=$cfg_opts" --enable-libvo-amrwbenc"
+cfg_opts=$cfg_opts" --enable-libgsm"
+cfg_opts=$cfg_opts" --enable-libmodplug"
+# Video
+cfg_opts=$cfg_opts" --enable-libtheora"
+cfg_opts=$cfg_opts" --enable-libopenjpeg"
+cfg_opts=$cfg_opts" --enable-libschroedinger"
+cfg_opts=$cfg_opts" --enable-libxvid"
+cfg_opts=$cfg_opts" --enable-libx264"
+#cfg_opts=$cfg_opts" --enable-libx265"
+cfg_opts=$cfg_opts" --enable-libvpx"
+cfg_opts=$cfg_opts" "
+
+cfg_opts=$cfg_opts" --extra-libs=-ldl" # Dynamic libc?
+
+# Don't add
+# --enable-avisynth - Windows only, requires vfw32
+# --enable-libaacplus - not available on ubuntu?
+# --enable-libcdio - something isn't right about the ubutu version "libavdevice/libcdio.c:26:23: fatal error: cdio/cdda.h: No such file or directory"
+# --enable-libnut - needs to be built from source on ubuntu, there is a good nut muxer built in, I believe;
+# --enable-libxavs - ??
+# --enable-openssl - What is this for?
+
+sudo apt-get -y install $pkg_build $pkg_io $pkg_enc
 
 if [ "$PAUSE" = "True" ] ; then
   read -p "Press any key to continue... " -n1 -s
@@ -126,26 +215,7 @@ echo "Build + Install ffmpeg"
 cd ffmpeg
 #cd libav
 
-#ffmpeg config options
-config_options=$config_options" --enable-gpl --enable-version3 --enable-nonfree --enable-x11grab --enable-vdpau --enable-runtime-cpudetect"
-config_options=$config_options" --enable-bzlib --enable-frei0r --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libdc1394 --enable-libfreetype --enable-libgsm --enable-libopenjpeg --enable-libschroedinger --enable-zlib"
-config_options=$config_options" --enable-libxvid --enable-libx264" # --enable-libx265" 
-config_options=$config_options" --enable-libfaac --enable-libmp3lame"
-config_options=$config_options" --enable-libvpx"
-config_options=$config_options" --enable-libtheora --enable-libvorbis --enable-libspeex"
-config_options=$config_options" --enable-libopus"
-config_options=$config_options" --enable-vaapi --enable-vda"  
-config_options=$config_options" --enable-fontconfig --enable-gnutls --enable-libass --enable-libbluray --enable-libflite --enable-libmodplug --enable-libopus --enable-libpulse --enable-librtmp --enable-libtwolame --enable-libv4l2 --enable-libvo-aacenc --enable-libvo-amrwbenc --enable-openal" #--enable-libopencv
-config_options=$config_options" --extra-libs=-ldl"
-# Stuff to add? --enable-libvo-aacenc --enable-libvo-amrwbenc ...in natty???
-# Don't add 
-# --enable-avisynth - Windows only, requires vfw32
-# --enable-libaacplus - not available on ubuntu?
-# --enable-libcdio - something isn't right about the ubutu version "libavdevice/libcdio.c:26:23: fatal error: cdio/cdda.h: No such file or directory"
-# --enable-libnut - needs to be built from source on ubuntu, there is a good nut muxer built in, I believe; 
-# --enable-libxavs - ??
-# --enable-openssl - What is this for?
-
+# Config options set at top of file
 echo ./configure $config_options
 ./configure $config_options
 if [ "$PAUSE" = "True" ] ; then
