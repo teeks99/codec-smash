@@ -70,7 +70,7 @@ pkg_enc=$pkg_enc" libx264-dev" # H.264
 cfg_opts=$cfg_opts" --enable-gpl --enable-version3 --enable-nonfree"
 cfg_opts=$cfg_opts" --enable-runtime-cpudetect"
 cfg_opts=$cfg_opts" --enable-vdpau --enable-vaapi --enable-vda"
-cfg_opts=$cfg_opts" --enable-opencl"
+#cfg_opts=$cfg_opts" --enable-opencl"
 # Grab/Compress
 cfg_opts=$cfg_opts" --enable-x11grab --enable-libdc1394"
 cfg_opts=$cfg_opts" --enable-openal"
