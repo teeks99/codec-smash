@@ -204,7 +204,7 @@ cd libvpx
 ./configure
 make
 vpx_version=`git describe`
-sudo checkinstall --pkgname=libvpx --pkgversion="5:$vpx_version" --backup=no --default --deldoc=yes --fstrans=no
+sudo checkinstall --pkgname=libvpx --pkgversion="5:${vpx_version#v}" --backup=no --default --deldoc=yes --fstrans=no
 sleep 2s
 if [ "$PAUSE" = "True" ] ; then
   read -p "Press any key to continue... " -n1 -s
