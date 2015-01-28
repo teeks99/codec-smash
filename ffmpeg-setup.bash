@@ -217,8 +217,8 @@ cd ffmpeg
 #cd libav
 
 # Config options set at top of file
-echo ./configure $config_options
-./configure $config_options
+echo ./configure $cfg_opts
+./configure $cfg_opts
 if [ "$PAUSE" = "True" ] ; then
   read -p "Press any key to continue... " -n1 -s
 fi
