@@ -204,7 +204,7 @@ cd libvpx
 ./configure
 make
 vpx_version=`git describe`
-sudo checkinstall --pkgname=libvpx --pkgversion="999:$vpx_version" --backup=no --default --deldoc=yes --fstrans=no
+sudo checkinstall --pkgname=libvpx --pkgversion="5:$vpx_version" --backup=no --default --deldoc=yes --fstrans=no
 sleep 2s
 if [ "$PAUSE" = "True" ] ; then
   read -p "Press any key to continue... " -n1 -s
@@ -223,7 +223,7 @@ if [ "$PAUSE" = "True" ] ; then
   read -p "Press any key to continue... " -n1 -s
 fi
 make
-sudo checkinstall --pkgname=ffmpeg --pkgversion="999:$ffmpeg_version" --backup=no --deldoc=yes --fstrans=no --default #" - fix highlighting
+sudo checkinstall --pkgname=ffmpeg --pkgversion="5:$ffmpeg_version" --backup=no --deldoc=yes --fstrans=no --default #" - fix highlighting
 hash x264 ffmpeg ffplay ffprobe
 sleep 2s
 if [ "$PAUSE" = "True" ] ; then
