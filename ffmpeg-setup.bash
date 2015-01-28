@@ -38,7 +38,7 @@ pkg_io=$pkg_io" vflib3-dev" # font rasterizer
 pkg_io=$pkg_io" flite1-dev" # Speech Synthesis
 pkg_io=$pkg_io" zlib1g-dev" # deflate compression
 pkg_io=$pkg_io" frei0r-plugins-dev" # Filtering
-pkg_io=$pkg_io" libcv2.3" # Open CV Filters+
+pkg_io=$pkg_io" libcv-dev" # Open CV Filters+
 pkg_io=$pkg_io" librtmp-dev" # Streams over RTMP
 # TODO: BZ2? OpenCL? VDA? LibPulse? FontConfig?
 pkg_enc=
