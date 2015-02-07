@@ -551,7 +551,7 @@ if __name__ == '__main__':
     parser.add_option("-w", "--html", action="store_true", dest="output_html", default=False, help="Output HTML web-page for each image sample")
     parser.add_option("-j", "--json", action="store_true", dest="output_json", default=False, help="Output JSON for each set of images")
     parser.add_option("-c", "--no_conversion", action="store_false", dest="conversion", default=True, help="Disable the actual conversion commands, only do post-processing")
-    parser.add_options("-l", "--list-jobs", action="store_true", dest="just_list", default=False, help='Only list the conversions that will be done')
+    parser.add_option("-l", "--list-jobs", action="store_true", dest="just_list", default=False, help='Only list the conversions that will be done')
 
     (options, args) = parser.parse_args()
     
