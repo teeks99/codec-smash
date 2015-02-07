@@ -431,6 +431,8 @@ class FFMpegTester():
         fstring = f.read()
         f.close()
         no_comment_string = remove_comments(fstring)
+        with open("debug_no_comment.json", 'w') as debug:
+            debug.write(no_comment_string)
         data = json.loads(no_comment_string)  # Really just need the vars
         trim_data = {}
         trim_data['input'] = data['input']
