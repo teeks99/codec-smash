@@ -492,10 +492,11 @@ class FFMpegTester():
                     combo['INPUT_NAME'] = input_name
                     combo['INPUT_FILES'] = input_files
                     output = test['output']
+                    for name, value in combo.items():
+                        output = output.replace(name, value)
                     combo['OUTPUT'] = output
                     cmds = test['commands'][:]
                     for name, value in combo.items():
-                        output = output.replace(name, value)
                         for val in range(len(cmds)):
                             cmds[val] = cmds[val].replace(name, value)
                     self.run_test_version(cmds, output)
