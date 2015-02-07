@@ -42,7 +42,7 @@ from optparse import OptionParser
 
 # This function will remove comments starting with # from a string
 # See: http://code.activestate.com/recipes/576704/ for any details, I removed the docstring part
-def remove_comments(source):
+def old_remove_comments(source):
     io_obj = cStringIO.StringIO(source)
     out = ""
     prev_toktype = tokenize.INDENT
@@ -65,6 +65,30 @@ def remove_comments(source):
         prev_toktype = token_type
         last_col = end_col
         last_lineno = end_line
+    return out
+
+def find_next(string):
+    comment_symbol = '#'
+    return string.find(comment_symbol)
+
+def trim_escaped(string, index):
+    if index >=1 and string[index-1] == '\\':
+        return string[:index-1] + string[index:]
+    return string
+
+def cut_comment(string, index):
+    return string[:index]
+
+def remove_comments(source):
+    out = ""
+    for line in source.splitlines():
+        string = line
+        index = find_next(string)
+        while index > -1:
+            string = trim_escaped(string, index)
+            string = cut_comment(string, index)
+            index = find_next(string)
+        out += string + '\n'
     return out
 
 def filesize_format(size_in_bytes,base=1000):
