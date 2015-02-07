@@ -467,8 +467,9 @@ class FFMpegTester():
                     # Append the special (and fixed) variables
                     combo['INPUT_NAME'] = input_name
                     combo['INPUT_FILES'] = input_files
-                    cmds = test['commands'][:]
                     output = test['output']
+                    combo['OUTPUT'] = output
+                    cmds = test['commands'][:]
                     for name, value in combo.items():
                         output = output.replace(name, value)
                         for val in range(len(cmds)):
