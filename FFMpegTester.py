@@ -539,8 +539,8 @@ class FFMpegTester():
         self.results.write("   <td>")
         if not self.just_list:
             thumbs = self.tps.grab_points(output)
-        for thumb in thumbs:
-            self.results.write('    <a href="' + thumb['img'] + '"><img src="' + thumb['thumb'] + '"></a>\n')
+            for thumb in thumbs:
+                self.results.write('    <a href="' + thumb['img'] + '"><img src="' + thumb['thumb'] + '"></a>\n')
         self.results.write("   </td>\n")
         self.results.write("  </tr>\n")
         self.results.flush()
