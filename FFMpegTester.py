@@ -519,7 +519,7 @@ class FFMpegTester():
             print cmd
             self.results.write("    " + cmd + "<br>\n") 
             c = shlex.split(str(cmd))
-            if self.run_conversion: # Only do re-processing, don't actually run
+            if self.run_conversion and not self.just_list: # Only do re-processing, don't actually run
                 call(c)
         os_stop = os.times()
         stop = time.time()
@@ -537,7 +537,8 @@ class FFMpegTester():
 
         # Create Image for each image point
         self.results.write("   <td>")
-        thumbs = self.tps.grab_points(output)
+        if not self.just_list:
+            thumbs = self.tps.grab_points(output)
         for thumb in thumbs:
             self.results.write('    <a href="' + thumb['img'] + '"><img src="' + thumb['thumb'] + '"></a>\n')
         self.results.write("   </td>\n")
@@ -550,6 +551,7 @@ if __name__ == '__main__':
     parser.add_option("-w", "--html", action="store_true", dest="output_html", default=False, help="Output HTML web-page for each image sample")
     parser.add_option("-j", "--json", action="store_true", dest="output_json", default=False, help="Output JSON for each set of images")
     parser.add_option("-c", "--no_conversion", action="store_false", dest="conversion", default=True, help="Disable the actual conversion commands, only do post-processing")
+    parser.add_options("-l", "--list-jobs", action="store_true", dest="just_list", default=False, help='Only list the conversions that will be done')
 
     (options, args) = parser.parse_args()
     
@@ -559,6 +561,7 @@ if __name__ == '__main__':
     t.input_file = options.input
     t.output_html = options.output_html
     t.output_json = options.output_json
+    t.just_list = options.just_list
     
     t.run()
 
