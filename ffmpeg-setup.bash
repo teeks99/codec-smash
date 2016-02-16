@@ -6,7 +6,6 @@ ffmpeg_version=3.0
 x264_version=DIST # 40bb56814e56ed342040bdbf30258aab39ee9e89
 x265_version=1.9
 vpx_version=1.5.0
-aacplus_version=2.0.2
 
 # Pause between sections
 #PAUSE=False
@@ -109,9 +108,6 @@ cfg_opts=$cfg_opts" --enable-libmp3lame"
 cfg_opts=$cfg_opts" --enable-libtwolame"
 cfg_opts=$cfg_opts" --enable-libfdk-aac"
 cfg_opts=$cfg_opts" --enable-libfaac"
-if [ "$aacplus_version" != "NONE" ]; then
-  cfg_opts=$cfg_opts" --enable-libaacplus"
-fi
 cfg_opts=$cfg_opts" --enable-libvorbis"
 cfg_opts=$cfg_opts" --enable-libspeex"
 cfg_opts=$cfg_opts" --enable-libopus"
@@ -227,29 +223,7 @@ then
 fi
 
 ###################################################
-if [ "$aacplus_version" != "DIST" ] && [ "$aacplus_version" != "NONE" ]
-then
-  echo "Build + Install aacplus"
-  sudo apt-get -y remove libaacplus-dev
-
-  if [ ! -d "libaacplus-$aacplus_version" ]; then
-    wget http://tipok.org.ua/downloads/media/aacplus/libaacplus/libaacplus-$aacplus_version.tar.gz
-    #wget http://ffmpeg.gusari.org/uploads/libaacplus-$aacplus_version.tar.gz
-    tar -xzf libaacplus-$aacplus_version.tar.gz
-  fi
-  pushd libaacplus-$aacplus_version
-  ./autogen.sh --enable-shared --enable-static
-  make
-  sudo checkinstall --pkgname=libaacplus-dev --pkgversion="$aacplus_version" --backup=no --deldoc=yes --default --fstrans=no #" - fix highlighting
-  sleep 2s
-  if [ "$PAUSE" = "True" ] ; then
-    read -p "Press any key to continue... " -n1 -s
-  fi
-  popd
-fi
-
-##################################################
-echo "Build + Install ffmpeg"
+cho "Build + Install ffmpeg"
 sudo apt-get -y remove ffmpeg 
 
 if [ ! -d "ffmpeg" ]; then  
