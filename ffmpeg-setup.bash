@@ -2,10 +2,10 @@
 # Builds ffmpeg, libx264, libvpx from git repos
 
 # Set version numbers here...use DIST to indicate that you aren't building it and to use the repo version
-ffmpeg_version=2.5.2
+ffmpeg_version=3.0
 x264_version=DIST # 40bb56814e56ed342040bdbf30258aab39ee9e89
-x265_version=1.4
-vpx_version=1.3.0
+x265_version=1.9
+vpx_version=1.5.0
 aacplus_version=2.0.2
 
 # Pause between sections
