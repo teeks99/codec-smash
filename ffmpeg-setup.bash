@@ -223,7 +223,7 @@ then
 fi
 
 ###################################################
-cho "Build + Install ffmpeg"
+echo "Build + Install ffmpeg"
 sudo apt-get -y remove ffmpeg 
 
 if [ ! -d "ffmpeg" ]; then  
