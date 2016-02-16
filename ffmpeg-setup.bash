@@ -22,7 +22,7 @@ fi # End of top unrachable block
 
 # ----- First Time Setup -----
 # Build Stuff
-pkg_build="git-core mercurial checkinstall yasm build-essential cmake texi2html pkg-config autoconf automake libtool unzip"
+pkg_build="git-core mercurial checkinstall yasm build-essential cmake texi2html pkg-config autoconf automake libtool unzip wget"
 
 # IO and Misc
 pkg_io=
