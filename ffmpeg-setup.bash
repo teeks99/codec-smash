@@ -209,7 +209,7 @@ then
   sudo apt-get -y remove libvpx-dev
 
   if [ ! -d "libvpx" ]; then
-    git clone http://git.chromium.org/webm/libvpx.git
+    git clone http://chromium.googlesource.com/webm/libvpx
   fi
   pushd libvpx
 
