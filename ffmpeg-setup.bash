@@ -109,7 +109,6 @@ cfg_opts=$cfg_opts" --enable-libmp3lame"
 cfg_opts=$cfg_opts" --enable-libtwolame"
 cfg_opts=$cfg_opts" --enable-libfdk-aac"
 cfg_opts=$cfg_opts" --enable-libfaac"
-cfg_opts=$cfg_opts" --enable-libvo-aacenc"
 if [ "$aacplus_version" != "NONE" ]; then
   cfg_opts=$cfg_opts" --enable-libaacplus"
 fi
